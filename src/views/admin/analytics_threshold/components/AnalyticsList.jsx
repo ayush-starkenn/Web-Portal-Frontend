@@ -1,0 +1,924 @@
+import React, { useEffect, useState } from "react";
+import { FilterMatchMode } from "primereact/api";
+import { DataTable } from "primereact/datatable";
+import { Toast } from "primereact/toast";
+import { Column } from "primereact/column";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import axios from "axios";
+import { Tag } from "primereact/tag";
+import Cookies from "js-cookie";
+import { useRef } from "react";
+
+export default function AnalyticsList({ data, onEdit, onDelete }) {
+  const token = Cookies.get("token");
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    device_type: { value: null, matchMode: FilterMatchMode.IN },
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [emptyFields, setEmptyFields] = useState([]);
+
+  const [editData, setEditData] = useState({
+    title: "",
+    customer_id: "",
+    score: {
+      brake: "",
+      tailgating: "",
+      rash_driving: "",
+      sleep_alert: "",
+      over_speed: "",
+      green_zone: "",
+    },
+    incentive: {
+      minimum_distance: "",
+      minimum_driver_rating: "",
+    },
+    accident: {
+      ttc_difference_percentage: "",
+    },
+    leadership_board: {
+      total_distance: "",
+    },
+    halt: {
+      duration: "",
+    },
+  });
+  const [listCustomers, setListCustomers] = useState([]);
+  const [selectedAT, setSelectedAT] = useState(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const toastRef = useRef(null);
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters["global"].value = value;
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  const clearSearch = () => {
+    setGlobalFilterValue("");
+    const _filters = { ...filters };
+    _filters["global"].value = null;
+    setFilters(_filters);
+  };
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/customers/get-all-customer`, {
+        headers: { authorization: `bearer ${token}` },
+      })
+      .then((res) => {
+        setListCustomers(res.data.customerData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [token, editData]);
+
+  const renderHeader = () => {
+    return (
+      <div className="my-4 flex justify-end">
+        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+          <span className="p-input-icon-left">
+            <i className="pi pi-search" />
+            <InputText
+              value={globalFilterValue}
+              onChange={onGlobalFilterChange}
+              placeholder="Keyword Search"
+              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
+            />
+            {globalFilterValue && (
+              <Button
+                icon="pi pi-times"
+                className="p-button-rounded  p-button-text dark:text-gray-50 dark:hover:text-gray-50"
+                onClick={clearSearch}
+              />
+            )}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const openDeleteDialog = (rowData) => {
+    setSelectedAT(rowData);
+    setDeleteDialogVisible(true);
+  };
+  const actionBodyTemplate = (rowData) => {
+    return (
+      <>
+        <Button
+          icon="pi pi-pencil"
+          rounded
+          tooltip="Edit"
+          tooltipOptions={{ position: "mouse" }}
+          className="mr-3 border border-gray-700 text-gray-700"
+          style={{ width: "2rem", height: "2rem" }}
+          onClick={() => openDialog(rowData)}
+        />
+        <Button
+          icon="pi pi-trash"
+          rounded
+          tooltip="Delete"
+          tooltipOptions={{ position: "mouse" }}
+          style={{ width: "2rem", height: "2rem" }}
+          className="border border-red-600 text-red-600"
+          onClick={() => openDeleteDialog(rowData)}
+        />
+      </>
+    );
+  };
+
+  const header = renderHeader();
+
+  //handle Delete
+  const DeleteDeviceDialog = ({ visible, onHide }) => {
+    const handleConfirmDelete = async () => {
+      try {
+        await onDelete(selectedAT?.threshold_uuid, selectedAT.title);
+        onHide();
+      } catch (error) {
+        console.error(error);
+        onHide();
+      }
+    };
+
+    return (
+      <Dialog
+        visible={visible}
+        onHide={onHide}
+        header="Confirm Delete"
+        footer={
+          <div>
+            <Button
+              label="Delete"
+              icon="pi pi-check"
+              className="mr-2 bg-red-500 px-3 py-2 text-white"
+              onClick={handleConfirmDelete}
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 "
+              onClick={onHide}
+            />
+          </div>
+        }
+      >
+        <div>Are you sure you want to delete {selectedAT?.title}?</div>
+      </Dialog>
+    );
+  };
+
+  //open edit AT dialog
+  const openDialog = (rowData) => {
+    setIsDialogVisible(true);
+
+    const analyticData = {
+      threshold_uuid: rowData.threshold_uuid,
+      customer_id: rowData.user_uuid,
+      title: rowData.title,
+      score: JSON.parse(rowData.score),
+      incentive: JSON.parse(rowData.incentive),
+      accident: JSON.parse(rowData.accident),
+      leadership_board: JSON.parse(rowData.leadership_board),
+      halt: JSON.parse(rowData.halt),
+      status: rowData.status,
+    };
+    setEditData(analyticData);
+
+    const emptyEditData = {
+      title: "",
+      customer_id: "",
+      score: {
+        brake: "",
+        tailgating: "",
+        rash_driving: "",
+        sleep_alert: "",
+        over_speed: "",
+        green_zone: "",
+      },
+      incentive: {
+        minimum_distance: "",
+        minimum_driver_rating: "",
+      },
+      accident: {
+        ttc_difference_percentage: "",
+      },
+      leadership_board: {
+        total_distance: "",
+      },
+      halt: {
+        duration: "",
+      },
+    };
+    const mergedData = Object.assign(emptyEditData, analyticData);
+
+    // Set the editData state with the merged data
+    setEditData(mergedData);
+  };
+
+  const closeDialog = () => {
+    setIsDialogVisible(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if any field is null in the editData
+    const emptyFieldNames = Object.keys(editData).filter(
+      (fieldName) =>
+        !editData[fieldName] ||
+        (typeof editData[fieldName] === "object" &&
+          Object.values(editData[fieldName]).some((val) => val === ""))
+    );
+
+    if (emptyFieldNames.length > 0) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Missing field",
+        detail: "Field cannot be empty",
+        life: 3000,
+      });
+      return;
+    }
+
+    // Add range validation checks similar to what you have in handleChange
+    if (
+      editData.score.brake < 1 ||
+      editData.score.brake > 1000 ||
+      editData.score.tailgating < 1 ||
+      editData.score.tailgating > 1000 ||
+      editData.score.rash_driving < 1 ||
+      editData.score.rash_driving > 1000 ||
+      editData.score.sleep_alert < 1 ||
+      editData.score.sleep_alert > 1000 ||
+      editData.score.over_speed < 1 ||
+      editData.score.over_speed > 1000 ||
+      editData.score.green_zone < 1 ||
+      editData.score.green_zone > 1000 ||
+      editData.incentive.minimum_distance < 1 ||
+      editData.incentive.minimum_distance > 1000 ||
+      editData.incentive.minimum_driver_rating < 1 ||
+      editData.incentive.minimum_driver_rating > 6 ||
+      editData.accident.ttc_difference_percentage < 1 ||
+      editData.accident.ttc_difference_percentage > 100 ||
+      editData.leadership_board.total_distance < 1 ||
+      editData.leadership_board.total_distance > 10000 ||
+      editData.halt.duration < 1 ||
+      editData.halt.duration > 1000
+    ) {
+      toastRef.current.show({
+        severity: "error",
+        summary: "Validation Error",
+        detail: "One or more fields have out-of-range values",
+        life: 3000,
+      });
+      return;
+    }
+
+    // Proceed with submitting the form if there are no empty fields or validation errors
+    try {
+      await onEdit(editData?.threshold_uuid, editData);
+      closeDialog();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChange = (e, name, nestedProperty = null) => {
+    let value = e.target ? e.target.value : e.value;
+
+    // For the "user_uuid" dropdown, directly use the selected value
+    if (name === "user_uuid") {
+      value = value.value;
+    }
+
+    setEditData((prevEditData) => {
+      // Clone the previous editData to avoid mutating the state directly
+      const clonedData = { ...prevEditData };
+
+      // If a nestedProperty is provided, update the nested property
+      if (nestedProperty) {
+        // Ensure the property exists in clonedData
+        if (!clonedData[name]) {
+          clonedData[name] = {};
+        }
+
+        // Custom range validation for specific fields
+        if (name === "score") {
+          if (
+            [
+              "brake",
+              "tailgating",
+              "rash_driving",
+              "sleep_alert",
+              "over_speed",
+              "green_zone",
+            ].includes(nestedProperty) &&
+            (value < 1 || value > 1000)
+          ) {
+            // Add a red border to indicate an out-of-range value
+            e.target.classList.add("border-red-600");
+          } else {
+            // Remove the red border if it's a valid value
+            e.target.classList.remove("border-red-600");
+          }
+        }
+
+        if (name === "incentive") {
+          if (
+            nestedProperty === "minimum_distance" &&
+            (value < 1 || value > 1000)
+          ) {
+            e.target.classList.add("border-red-600");
+          } else if (
+            nestedProperty === "minimum_driver_rating" &&
+            (value < 1 || value > 6)
+          ) {
+            e.target.classList.add("border-red-600");
+          } else {
+            e.target.classList.remove("border-red-600");
+          }
+        }
+        if (name === "accident") {
+          if (
+            nestedProperty === "ttc_difference_percentage" &&
+            (value < 1 || value > 101)
+          ) {
+            e.target.classList.add("border-red-600");
+          } else {
+            e.target.classList.remove("border-red-600");
+          }
+        }
+        if (name === "leadership_board") {
+          if (
+            nestedProperty === "total_distance" &&
+            (value < 1 || value > 10000)
+          ) {
+            e.target.classList.add("border-red-600");
+          } else {
+            e.target.classList.remove("border-red-600");
+          }
+        }
+        if (name === "halt") {
+          if (nestedProperty === "duration" && (value < 1 || value > 1000)) {
+            e.target.classList.add("border-red-600");
+          } else {
+            e.target.classList.remove("border-red-600");
+          }
+        }
+
+        // Continue handling other fields and ranges as needed
+        clonedData[name][nestedProperty] = value;
+      } else {
+        clonedData[name] = value;
+      }
+
+      // Check if the field is empty and update the emptyFields state
+      if (!value) {
+        setEmptyFields((prevEmptyFields) => {
+          if (!prevEmptyFields.includes(name)) {
+            return [...prevEmptyFields, name];
+          }
+          return prevEmptyFields;
+        });
+      } else {
+        // Remove the field from the emptyFields state if it's no longer empty
+        setEmptyFields((prevEmptyFields) =>
+          prevEmptyFields.filter((field) => field !== name)
+        );
+      }
+
+      // Return the updated data
+      return clonedData;
+    });
+  };
+
+  const Customersoptions = () => {
+    return listCustomers?.map((el, index) => ({
+      key: `customerOption_${index}`,
+      label: el.first_name + " " + el.last_name,
+      value: el.user_uuid,
+    }));
+  };
+
+  // Status body
+  const getStatusSeverity = (option) => {
+    switch (option) {
+      case 1:
+        return "success";
+
+      case 2:
+        return "danger";
+
+      default:
+        return null;
+    }
+  };
+
+  const statusBodyTemplate = (rowData) => {
+    return (
+      <Tag
+        value={rowData.status === 1 ? "Active" : "Deactive"}
+        severity={getStatusSeverity(rowData.status)}
+      />
+    );
+  };
+
+  const handleStatusChange = (event) => {
+    const newValue = parseInt(event.target.value);
+    setEditData({ ...editData, status: newValue });
+  };
+
+  // Edit dialog
+  return (
+    <div className="card">
+      <Dialog
+        visible={isDialogVisible}
+        onHide={closeDialog}
+        style={{ width: "40rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Edit the details"
+        modal
+        className="p-fluid dark:bg-gray-900"
+      >
+        <form onSubmit={handleSubmit} className="mx-auto">
+          <div className="mx-auto mt-8">
+            <span className="p-float-label">
+              <InputText
+                id="title"
+                name="title"
+                onChange={(e) => handleChange(e, "title")}
+                value={editData?.title || ""}
+                className={`border py-2 pl-2 ${
+                  emptyFields.includes("title") ? "border-red-600" : ""
+                }`}
+              />
+
+              <label htmlFor="title" className="dark:text-gray-150">
+                Title
+              </label>
+            </span>
+          </div>
+
+          <div className="mx-auto mt-8">
+            <span className="p-float-label">
+              <Dropdown
+                disabled
+                id="user_uuid"
+                name="user_uuid"
+                options={Customersoptions()}
+                optionLabel="label"
+                optionValue="value"
+                className="p-dropdown border"
+                value={editData?.customer_id || ""}
+                onChange={(e) => handleChange(e, "customer_id")}
+              />
+
+              <label htmlFor="user_uuid" className="dark:text-gray-150">
+                Customer List
+              </label>
+            </span>
+          </div>
+
+          <p className="my-2 block text-lg font-medium text-gray-600 dark:text-white">
+            Weightage
+          </p>
+          <div className="card p-fluid flex flex-wrap gap-3">
+            <div className="mt-6 flex-auto ">
+              <span className="p-float-label">
+                <InputText
+                  name="brake-input"
+                  keyfilter="pint"
+                  title="(1-1000)"
+                  id="brake-input"
+                  onChange={(e) => handleChange(e, "score", "brake")}
+                  value={editData?.score.brake || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") && !editData?.score.brake
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label htmlFor="brake-input" className="dark:text-gray-300">
+                  Brake
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+            <div className=" mt-6 flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  id="tailgating-input"
+                  name="tailgating-input"
+                  keyfilter="pint"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "score", "tailgating")}
+                  value={editData?.score.tailgating || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") && !editData?.score.tailgating
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="tailgating-input"
+                  className="dark:text-gray-150"
+                >
+                  Tailgating
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+            <div className="mt-6 flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  id="rash-driving-input"
+                  keyfilter="pint"
+                  name="rash-driving-input"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "score", "rash_driving")}
+                  value={editData?.score.rash_driving || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") &&
+                    !editData?.score.rash_driving
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="rash-driving-input"
+                  className="dark:text-gray-150"
+                >
+                  Rash Driving
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+            <div className="mt-6 flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  id="sleep-alert-input"
+                  keyfilter="pint"
+                  name="sleep-alert-input"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "score", "sleep_alert")}
+                  value={editData?.score.sleep_alert || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") &&
+                    !editData?.score.sleep_alert
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="sleep-alert-input"
+                  className="dark:text-gray-150"
+                >
+                  Sleep Alert
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+            <div className="mt-3 flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  keyfilter="pint"
+                  id="over-speed-input"
+                  name="over-speed-input"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "score", "over_speed")}
+                  value={editData?.score.over_speed || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") && !editData?.score.over_speed
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="over-speed-input"
+                  className="dark:text-gray-150"
+                >
+                  Over Speed
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+            <div className="mt-3 flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  keyfilter="pint"
+                  id="green-zone-input"
+                  name="green-zone-input"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "score", "green_zone")}
+                  value={editData?.score.green_zone || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("score") && !editData?.score.green_zone
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="green-zone-input"
+                  className="dark:text-gray-150"
+                >
+                  Green Zone
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-1000
+              </small>
+            </div>
+          </div>
+          <div className="my-6">
+            <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
+              Incentive
+            </p>
+            <div className="card p-fluid flex flex-wrap gap-3">
+              <div className="mt-6 flex-auto">
+                <span className="p-float-label">
+                  <InputText
+                    id="minimum-distance-input"
+                    keyfilter="pint"
+                    name="minimum-distance-input"
+                    title="(1-1000)"
+                    onChange={(e) =>
+                      handleChange(e, "incentive", "minimum_distance")
+                    }
+                    value={editData?.incentive.minimum_distance || ""}
+                    className={`border py-2 pl-2 ${
+                      emptyFields.includes("incentive") &&
+                      !editData?.incentive.minimum_distance
+                        ? "border-red-600"
+                        : ""
+                    }`}
+                  />
+                  <label
+                    htmlFor="minimum-distance-input"
+                    className="dark:text-gray-150"
+                  >
+                    Minimum Distance
+                  </label>
+                </span>
+                <small className="text-gray-400 dark:text-gray-150">
+                  Range: 0-1000
+                </small>
+              </div>
+              <div className="mt-6 flex-auto">
+                <span className="p-float-label">
+                  <InputText
+                    id="minimum-driver-rating-input"
+                    keyfilter="pint"
+                    name="minimum-driver-rating-input"
+                    title="(0-5)"
+                    onChange={(e) =>
+                      handleChange(e, "incentive", "minimum_driver_rating")
+                    }
+                    value={editData?.incentive.minimum_driver_rating || ""}
+                    className={`border py-2 pl-2 ${
+                      emptyFields.includes("incentive") &&
+                      !editData?.incentive.minimum_driver_rating
+                        ? "border-red-600"
+                        : ""
+                    }`}
+                  />
+                  <label
+                    htmlFor="minimum-driver-rating-input"
+                    className="dark:text-gray-150"
+                  >
+                    Minimum Driver Rating
+                  </label>
+                </span>
+                <small className="text-gray-400 dark:text-gray-150">
+                  Range: 0-5
+                </small>
+              </div>
+            </div>
+          </div>
+          <div className="mb-6">
+            <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
+              Accident
+            </p>
+            <div className="card p-fluid mt-6 flex flex-wrap gap-3">
+              <div className="w-[285px]">
+                <span className="p-float-label">
+                  <InputText
+                    id="ttc-difference-percentage-input"
+                    keyfilter="pint"
+                    name="ttc-difference-percentage-input"
+                    title="(0-100)"
+                    onChange={(e) =>
+                      handleChange(e, "accident", "ttc_difference_percentage")
+                    }
+                    value={editData?.accident.ttc_difference_percentage || ""}
+                    className={`border py-2 pl-2 ${
+                      emptyFields.includes("accident") &&
+                      !editData?.accident.ttc_difference_percentage
+                        ? "border-red-600"
+                        : ""
+                    }`}
+                  />
+                  <label
+                    htmlFor="ttc-difference-percentage-input"
+                    className=" dark:text-gray-150"
+                  >
+                    TTC Difference Percentage
+                  </label>
+                </span>
+                <small className="text-gray-400 dark:text-gray-150">
+                  Range: 0-100
+                </small>
+              </div>
+            </div>
+          </div>
+          <p className="mb-2 block text-lg font-medium text-gray-600 dark:text-white">
+            Leadership Board
+          </p>
+          <div className="card p-fluid mt-6 flex flex-wrap gap-3">
+            <div className="w-[285px]">
+              <span className="p-float-label">
+                <InputText
+                  id="total-distance-input"
+                  keyfilter="pint"
+                  name="total-distance-input"
+                  title="(0-10000)"
+                  onChange={(e) =>
+                    handleChange(e, "leadership_board", "total_distance")
+                  }
+                  value={editData?.leadership_board.total_distance || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("leadership_board") &&
+                    !editData?.leadership_board.total_distance
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="total-distance-input"
+                  className="dark:text-gray-150"
+                >
+                  Total Distance
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 0-10000
+              </small>
+            </div>
+          </div>
+          <p className="my-2 block text-lg font-medium text-gray-600 dark:text-white">
+            Halt
+          </p>
+          <div className="card p-fluid mt-6 flex flex-wrap gap-3">
+            <div className="w-[285px]">
+              <span className="p-float-label">
+                <InputText
+                  id="halt-duration-input"
+                  keyfilter="pint"
+                  name="halt-duration-input"
+                  title="(1-1000)"
+                  onChange={(e) => handleChange(e, "halt", "duration")}
+                  value={editData?.halt.duration || ""}
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("halt") && !editData?.halt.duration
+                      ? "border-red-600"
+                      : ""
+                  }`}
+                />
+                <label
+                  htmlFor="halt-duration-input"
+                  className="dark:text-gray-150"
+                >
+                  Duration
+                </label>
+              </span>
+              <small className="text-gray-400 dark:text-gray-150">
+                Range: 1-1000
+              </small>
+            </div>
+          </div>
+
+          <div className="my-4">
+            <input
+              type="radio"
+              className="inlinemx-2 mx-2"
+              name="status"
+              id="userActive"
+              value={1}
+              onChange={handleStatusChange}
+              checked={editData.status === 1}
+            />
+            <label htmlFor="userActive">Active</label>
+            <input
+              type="radio"
+              className="mx-2 inline"
+              name="status"
+              id="userDeactive"
+              value={2}
+              onChange={handleStatusChange}
+              checked={editData.status === 2}
+            />
+            <label htmlFor="userDeactive">Deactive</label>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <button
+              type="submit"
+              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white  hover:bg-blue-600"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </Dialog>
+      <Toast ref={toastRef} className="toast-custom" position="top-right" />
+
+      {/* List of AT */}
+      <DataTable
+        value={data}
+        removableSort
+        paginator
+        dataKey="threshold_uuid"
+        header={header}
+        rows={5}
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        rowsPerPageOptions={[5, 10, 25]}
+        filters={filters}
+        filterDisplay="menu"
+        globalFilterFields={["title", "user_uuid"]}
+        emptyMessage="No Analytic Threshold found."
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      >
+        <Column
+          field="serialNo"
+          header="Sr. No."
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "3rem" }}
+        ></Column>
+        <Column
+          field="title"
+          header="Title"
+          sortable
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "14rem" }}
+        ></Column>
+
+        <Column
+          field="customer_name"
+          header="Customer"
+          sortable
+          body={(rowData) => (
+            <Tag
+              className="my-1 mr-2 bg-gray-200 text-gray-800"
+              icon="pi pi-user"
+              style={{
+                width: "fit-content",
+                height: "25px",
+                lineHeight: "40px",
+              }}
+              value={rowData.customer_name}
+            />
+          )}
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "14rem" }}
+        ></Column>
+
+        <Column
+          field="status"
+          header="Status"
+          body={statusBodyTemplate}
+          sortable
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "14rem" }}
+        ></Column>
+
+        <Column
+          body={actionBodyTemplate}
+          header="Action"
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "10rem" }}
+        ></Column>
+      </DataTable>
+      <DeleteDeviceDialog
+        visible={deleteDialogVisible}
+        onHide={() => setDeleteDialogVisible(false)}
+      />
+    </div>
+  );
+}

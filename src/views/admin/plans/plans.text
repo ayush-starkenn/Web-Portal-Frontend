@@ -1,0 +1,67 @@
+const plans = [
+    {
+      type: "Free",
+      price: "₹0",
+      subscription: "month",
+      description:
+        "Perfect for using in a personal website or a client project.",
+      buttonText: "Choose Free",
+      items: [
+        "1 User",
+        "All UI components",
+        "Lifetime access",
+        "Free updates",
+        "Use on 1 (one) project",
+        "3 Months support",
+      ],
+    },
+    {
+      type: "Basic",
+      price: "₹199",
+      subscription: "month",
+      description:
+        "Perfect for using in a personal website or a client project.",
+      buttonText: "Choose Basic",
+      active: true,
+      items: [
+        "5 User",
+        "All UI components",
+        "Lifetime access",
+        "Free updates",
+        "Use on 31 (Three) project",
+        "4 Months support",
+      ],
+    },
+    {
+      type: "Standard",
+      price: "₹256",
+      subscription: "month",
+      description:
+        "Perfect for using in a personal website or a client project.",
+      buttonText: "Choose Standard",
+      items: [
+        "Unlimited User",
+        "All UI components",
+        "Lifetime access",
+        "Free updates",
+        "Unlimited project",
+        "12 Months support",
+      ],
+    },
+    {
+      type: "Premium",
+      price: "₹356",
+      subscription: "month",
+      description:
+        "Perfect for using in a personal website or a client project.",
+      buttonText: "Choose Premium",
+      items: [
+        "Unlimited User",
+        "All UI components",
+        "Lifetime access",
+        "Free updates",
+        "Unlimited project",
+        "12 Months support",
+      ],
+    },
+  ];
