@@ -6,6 +6,7 @@ import Widget from "components/widget/Widget";
 import Cookies from "js-cookie";
 import MapOverview from "components/maps/MapOverview";
 import VehicleData from "./components/VehicleData";
+import AlertIncident from "./components/AlertIncident";
 
 const Dashboard = () => {
   let token = Cookies.get("token");
@@ -71,6 +72,8 @@ const Dashboard = () => {
         <MapOverview className="rounded-lg" />
         <VehicleData />
       </div>
+
+      <AlertIncident className=' !ml-0 mt-20'/>
 
       {/* <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-3">
         <Widget
