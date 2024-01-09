@@ -7,7 +7,7 @@ import DevicesAdmin from "views/admin/devices";
 import AnalyticsThreshold from "views/admin/analytics_threshold";
 import FeatureSet from "views/admin/feature_set";
 import Customers from "views/admin/customers";
-import Plans from "views/admin/plans";
+// import Plans from "views/admin/plans";
 // Customer Imports
 import MainDashboard from "views/customer/default";
 import Vehicles from "views/customer/vehicles";
@@ -24,7 +24,7 @@ import {
   MdContactPhone,
 } from "react-icons/md";
 import { CgOrganisation } from "react-icons/cg";
-import { CiWallet } from "react-icons/ci";
+// import { CiWallet } from "react-icons/ci";
 import { BsTruck, BsFillCpuFill } from "react-icons/bs";
 import { RiAlertLine } from "react-icons/ri";
 import { TbReport, TbDeviceAnalytics } from "react-icons/tb";
@@ -64,18 +64,18 @@ export const routes_admin = [
       </AdminProtected>
     ),
   },
-  {
-    name: "Plans",
-    title: "Plans",
-    layout: "/admin",
-    path: "plans",
-    icon: <CiWallet className="h-7 w-7" />,
-    component: (
-      <AdminProtected>
-        <Plans />
-      </AdminProtected>
-    ),
-  },
+  // {
+  //   name: "Plans",
+  //   title: "Plans",
+  //   layout: "/admin",
+  //   path: "plans",
+  //   icon: <CiWallet className="h-7 w-7" />,
+  //   component: (
+  //     <AdminProtected>
+  //       <Plans />
+  //     </AdminProtected>
+  //   ),
+  // },
   {
     name: "Customers",
     title: "Customers",

@@ -24,7 +24,6 @@ const Customers = () => {
   const [userType, setUserType] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastRef = useRef(null);
-  const toastErr = useRef(null);
 
   const [formErrors, setFormErrors] = useState({
     f_name: false,
@@ -345,7 +344,6 @@ const Customers = () => {
   return (
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
-      <Toast ref={toastErr} className="bg-red-400" />
       <div className="flex justify-between">
         <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
           Customers

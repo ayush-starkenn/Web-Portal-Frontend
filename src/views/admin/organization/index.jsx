@@ -212,9 +212,9 @@ const Organization = () => {
               {emptyFields.includes("selectedPlan") && (
                 <small className="text-red-500">Plan is required.</small>
               )}
-              <small className="ml-2 text-blue-600 underline dark:text-blue-400">
+              {/* <small className="ml-2 text-blue-600 underline dark:text-blue-400">
                 <a href="/admin/plans">Explore Plans</a>
-              </small>
+              </small> */}
             </div>
           </div>
           <div className="mb-6 ml-2 mt-4">
@@ -304,7 +304,147 @@ const Organization = () => {
               )}
             </div>
           </div>
+          <div className="mb-8 mt-4 rounded-sm bg-gray-150 py-1 text-center shadow-white">
+            <span className="font-semibold">Add Default Admin</span>
+          </div>
+          <div className="flex justify-evenly gap-4">
+            <div className="card justify-content-center flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  id="first_name"
+                  type="text"
+                  name="first_name"
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("first_name") ? "border-red-500" : ""
+                  }`}
+                  autoComplete="off"
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="first_name" className="dark:text-gray-300">
+                  First Name
+                </label>
+              </span>
+              {emptyFields.includes("address") && (
+                <small className="text-red-500">First name is required.</small>
+              )}
+            </div>
+            <div className="card justify-content-center flex-auto">
+              <span className="p-float-label">
+                <InputText
+                  id="last_name"
+                  type="text"
+                  name="last_name"
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("last_name") ? "border-red-500" : ""
+                  }`}
+                  autoComplete="off"
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="last_name" className="dark:text-gray-300">
+                  Last Name
+                </label>
+              </span>
+              {emptyFields.includes("city") && (
+                <small className="text-red-500">Last name is required.</small>
+              )}
+            </div>
+          </div>
+          <div className="mt-8 flex justify-evenly gap-4">
+            <div className="card justify-content-center flex-1">
+              <span className="p-float-label">
+                <InputText
+                  id="email_id"
+                  type="email"
+                  name="email_id"
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("email_id") ? "border-red-500" : ""
+                  }`}
+                  autoComplete="off"
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="email_id" className="dark:text-gray-300">
+                  Email
+                </label>
+              </span>
+              {emptyFields.includes("address") && (
+                <small className="text-red-500">Email ID is required.</small>
+              )}
+            </div>
+            <div className="card justify-content-center flex-1">
+              <span className="p-float-label">
+                <Dropdown
+                  id="org_type"
+                  name="selectedOrg"
+                  value={selectedOrg || ""}
+                  options={orgOptions()}
+                  onChange={(e) => {
+                    setSelectedOrg(e.value);
+                    handleDropdownChange("selectedOrg");
+                  }}
+                  className={`h-11 border ${
+                    emptyFields.includes("selectedOrg") ? "border-red-500" : ""
+                  }`}
+                  optionLabel="label"
+                />
 
+                <label htmlFor="org_type" className="dark:text-gray-300">
+                  User Type
+                </label>
+              </span>
+              {emptyFields.includes("selectedOrg") && (
+                <small className="text-red-500">User type is required.</small>
+              )}
+            </div>
+          </div>
+          <div className="mt-8 flex justify-evenly gap-4">
+            <div className="card justify-content-center flex-1">
+              <span className="p-float-label">
+                <Dropdown
+                  id="org_type"
+                  name="selectedOrg"
+                  value={selectedOrg || ""}
+                  options={orgOptions()}
+                  onChange={(e) => {
+                    setSelectedOrg(e.value);
+                    handleDropdownChange("selectedOrg");
+                  }}
+                  className={`h-11 border ${
+                    emptyFields.includes("selectedOrg") ? "border-red-500" : ""
+                  }`}
+                  optionLabel="label"
+                />
+
+                <label htmlFor="org_type" className="dark:text-gray-300">
+                  Organization Type
+                </label>
+              </span>
+              {emptyFields.includes("selectedOrg") && (
+                <small className="text-red-500">
+                  Organization type is required.
+                </small>
+              )}
+            </div>
+            <div className="card justify-content-center flex-1">
+              <span className="p-float-label">
+                <InputText
+                  id="email_id"
+                  type="email"
+                  name="email_id"
+                  className={`border py-2 pl-2 ${
+                    emptyFields.includes("email_id") ? "border-red-500" : ""
+                  }`}
+                  autoComplete="off"
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="email_id" className="dark:text-gray-300">
+                  Contact Information
+                </label>
+              </span>
+              {emptyFields.includes("address") && (
+                <small className="text-red-500">Email ID is required.</small>
+              )}
+            </div>
+          </div>
           <div className="mt-6 flex justify-center">
             <button
               type="submit"
