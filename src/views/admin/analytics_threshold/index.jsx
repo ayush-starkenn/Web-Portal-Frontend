@@ -15,7 +15,6 @@ const AnalyticsThreshold = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [data, setData] = useState([]);
   const toastRef = useRef(null);
-  const toastErr = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [formErrors, setFormErrors] = useState({
@@ -336,7 +335,6 @@ const AnalyticsThreshold = () => {
   return (
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
-      <Toast ref={toastErr} className="bg-red-400" />
       <div className="flex justify-between">
         <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
           AnalyticsThreshold
