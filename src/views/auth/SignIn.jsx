@@ -75,38 +75,41 @@ const SignIn = () => {
     if (data.email && data.password) {
       setLoading(true);
       axios
-        .post(`${process.env.REACT_APP_API_URL}/login`, data)
+        .post(`${process.env.REACT_APP_AWS_URL}/loginUser`, data)
+        // .post(`${process.env.REACT_APP_API_URL}/login`, data)
         .then((res) => {
-          const token = res.data.token;
-          const user_type = res.data.user.user_type;
-          const user_uuid = res.data.user.user_uuid;
-          const first_name = res.data.user.first_name;
-          const expirationTime = new Date();
-          expirationTime.setDate(expirationTime.getDate() + 7); // Cookie expires in 7 days (1 week)
+          console.log(res);
+          // const token = res.data.token;
+          // const user_type = res.data.user.user_type;
+          // const user_uuid = res.data.user.user_uuid;
+          // const first_name = res.data.user.first_name;
+          // const expirationTime = new Date();
+          // expirationTime.setDate(expirationTime.getDate() + 7); // Cookie expires in 7 days (1 week)
 
-          Cookies.set("token", token, {
-            expires: expirationTime,
-            sameSite: "strict",
-          });
-          Cookies.set("user_uuid", user_uuid, {
-            expires: expirationTime,
-            sameSite: "strict",
-          });
-          Cookies.set("user_type", user_type, {
-            expires: expirationTime,
-            sameSite: "strict",
-          });
-          Cookies.set("first_name", first_name, {
-            expires: expirationTime,
-            sameSite: "strict",
-          });
-          if (user_type === 1) {
-            setLoading(false);
-            navigate("/admin/dashboard");
-          } else {
-            setLoading(false);
-            navigate("/customer/dashboard");
-          }
+          // Cookies.set("token", token, {
+          //   expires: expirationTime,
+          //   sameSite: "strict",
+          // });
+          // Cookies.set("user_uuid", user_uuid, {
+          //   expires: expirationTime,
+          //   sameSite: "strict",
+          // });
+          // Cookies.set("user_type", user_type, {
+          //   expires: expirationTime,
+          //   sameSite: "strict",
+          // });
+          // Cookies.set("first_name", first_name, {
+          //   expires: expirationTime,
+          //   sameSite: "strict",
+          // });
+          // if (user_type === 1) {
+          //   setLoading(false);
+          //   navigate("/admin/dashboard");
+          // } else {
+          //   setLoading(false);
+          //   navigate("/customer/dashboard");
+          // }
+          navigate("/admin/dashboard");
           setLoading(false);
         })
         .catch((err) => {

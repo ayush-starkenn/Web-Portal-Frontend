@@ -7,6 +7,8 @@ import MapOverview from "../../../components/maps/MapOverview";
 import OngoingTable from "./components/OngoingTable";
 import LogsTable from "./components/LogsTable";
 import { RiContactsLine } from "react-icons/ri";
+import VehicleData from "views/admin/default/components/VehicleData";
+import AlertIncident from "views/admin/default/components/AlertIncident";
 
 const MainDashboard = () => {
   const user_uuid = Cookies.get("user_uuid");
@@ -61,7 +63,7 @@ const MainDashboard = () => {
       <h4 className="text-dark py-3 text-2xl font-bold dark:text-white">
         Dashboard
       </h4>
-      <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-3">
+      {/* <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-3">
         <Widget
           icon={<BsFillCpuFill className="h-6 w-6" />}
           title={"Devices"}
@@ -81,9 +83,9 @@ const MainDashboard = () => {
           subtitle={driversCount}
           cardhref="/customer/contacts"
         />
-      </div>
+      </div> */}
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <MapOverview />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-2">
@@ -93,6 +95,13 @@ const MainDashboard = () => {
         <div>
           <LogsTable />
         </div>
+      </div> */}
+      <div className="mt-3 flex flex-row justify-between sm-max:flex-col">
+        <MapOverview className="rounded-lg" />
+        <VehicleData />
+      </div>
+      <div>
+        <AlertIncident className="!ml-0 mt-20" />
       </div>
     </div>
   );

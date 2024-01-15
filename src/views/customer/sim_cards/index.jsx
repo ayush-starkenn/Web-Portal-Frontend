@@ -41,12 +41,9 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_AWS_URL}/getDevices`, {
-        headers: {
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTI3MTdiYWYtYWEyOS0xMWVlLTlmYzgtMGEzM2M4N2QxMDNlIiwiaWF0IjoxNzA1Mjk0MDYxLCJleHAiOjE3MDUzODA0NjF9.ASUqcymuh5U2zwTKsoBEitn1NY-CNrTtfNdzWlgzjGo`,
-        },
+      .get(`${process.env.REACT_APP_API_URL}/devices/list-devices`, {
+        headers: { authorization: `bearer ${token}` },
       })
-
       .then((res) => {
         const formattedData = res.data.devices.map((item, index) => ({
           ...item,

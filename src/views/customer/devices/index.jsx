@@ -19,16 +19,16 @@ const Devices = () => {
   //Fetching all data
   useEffect(() => {
     axios
-      .get(
-        `${process.env.REACT_APP_API_URL}/devices/get-user-devices-list/${user_uuid}`,
-        { headers: { authorization: `bearer ${token}` } }
-      )
+      .get(`${process.env.REACT_APP_AWS_URL}/getDevices`, {
+        headers: { authorization: `bearer ${token}` },
+      })
       .then((res) => {
-        const formattedData = res.data.results.map((item, index) => ({
-          ...item,
-          serialNo: index + 1,
-        }));
-        setData(formattedData);
+        console.log(res);
+        // const formattedData = res.data.results.map((item, index) => ({
+        //   ...item,
+        //   serialNo: index + 1,
+        // }));
+        // setData(formattedData);
       })
       .catch((err) => {
         console.log(err);
