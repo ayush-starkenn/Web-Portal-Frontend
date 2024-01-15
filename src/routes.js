@@ -22,6 +22,7 @@ import {
   MdOutlineDashboard,
   MdOutlineFeaturedPlayList,
   MdContactPhone,
+  MdOutlineSimCard,
 } from "react-icons/md";
 import { CgOrganisation } from "react-icons/cg";
 // import { CiWallet } from "react-icons/ci";
@@ -101,6 +102,18 @@ export const routes_admin = [
     ),
   },
   {
+    name: "Sim Cards",
+    title: "Sim Cards",
+    layout: "/admin",
+    path: "sim-cards",
+    icon: <MdOutlineSimCard className="h-7 w-7" />,
+    component: (
+      <AdminProtected>
+        <Customers />
+      </AdminProtected>
+    ),
+  },
+  {
     name: "Vehicles",
     title: "Vehicles",
     layout: "/admin",
@@ -163,6 +176,18 @@ export const routes_customer = [
     component: (
       <CustomerProtected>
         <Devices />
+      </CustomerProtected>
+    ),
+  },
+  {
+    name: "Sim Cards",
+    title: "Sim Cards",
+    layout: "/admin",
+    path: "sim-cards",
+    icon: <MdOutlineSimCard className="h-7 w-7" />,
+    component: (
+      <CustomerProtected>
+        <Customers />
       </CustomerProtected>
     ),
   },
