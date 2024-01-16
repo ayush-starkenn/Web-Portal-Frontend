@@ -25,6 +25,10 @@
   background: #727070;
 }
 
+::-webkit-scrollbar{
+  display: none !important;
+}
+
 input.defaultCheckbox::before {
   content: url(../src/assets/svg/checked.svg);
   color: white;
