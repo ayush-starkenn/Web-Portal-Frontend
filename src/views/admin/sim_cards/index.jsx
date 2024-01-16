@@ -10,7 +10,7 @@ import { Dropdown } from "primereact/dropdown";
 import Cookies from "js-cookie";
 import { FiPlus } from "react-icons/fi";
 
-const DevicesAdmin = () => {
+const SimCards = () => {
   const token = Cookies.get("token");
   const userUUID = Cookies.get("user_uuid");
   const [devices, setDevices] = useState(true);
@@ -41,16 +41,17 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/devices/list-devices`, {
-        headers: { authorization: `bearer ${token}` },
+      .get(`${process.env.REACT_APP_AWS_URL}/getAllSimCards`, {
+        headers: { Authorization: token },
       })
       .then((res) => {
-        const formattedData = res.data.devices.map((item, index) => ({
+        const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
           key: index + 1,
         }));
         setData(formattedData);
+        console.log(res.data.data);
       })
       .catch((err) => {
         console.log(err);
@@ -462,4 +463,4 @@ const DevicesAdmin = () => {
   );
 };
 
-export default DevicesAdmin;
+export default SimCards;

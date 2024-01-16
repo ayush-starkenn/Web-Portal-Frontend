@@ -13,7 +13,6 @@ import { Tag } from "primereact/tag";
 
 export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const token = Cookies.get("token");
-
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
@@ -370,7 +369,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
             </div>
           )}
           <div className="mt-6 flex justify-end">
-
             <button
               type="submit"
               className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
@@ -415,12 +413,26 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           style={{ minWidth: "12rem" }}
         ></Column>
         <Column
-          field="device_type"
           header="Device Type"
           sortField="device_type"
           sortable
           className="border-b dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
+          body={(rowData) => {
+            const deviceType = rowData.device_type_id;
+            let label;
+            if (deviceType === 1) {
+              label = "ECU";
+            } else if (deviceType === 2) {
+              label = "DMS";
+            } else if (deviceType === 3) {
+              label = "IOT";
+            } else {
+              label = "Unknown";
+            }
+
+            return <span>{label}</span>;
+          }}
         ></Column>
         <Column
           field="full_name"

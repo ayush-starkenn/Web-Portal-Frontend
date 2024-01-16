@@ -38,6 +38,7 @@ import CustomerProtected from "authorization/CustomerProtected";
 import OngoingTrip from "views/customer/vehicles/components/OngoingTrip";
 import CompletedTrip from "views/customer/vehicles/components/CompletedTrip";
 import Organization from "views/admin/organization";
+import SimCards from "views/admin/sim_cards";
 
 //routes for Admin panel
 export const routes_admin = [
@@ -47,11 +48,7 @@ export const routes_admin = [
     layout: "/admin",
     path: "dashboard",
     icon: <MdOutlineDashboard className="h-7 w-7" />,
-    component: (
-      <AdminProtected>
-        <Dashboard />
-      </AdminProtected>
-    ),
+    component: <Dashboard />,
   },
   {
     name: "Organization",
@@ -60,9 +57,9 @@ export const routes_admin = [
     path: "organization",
     icon: <CgOrganisation className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <Organization />
-      </AdminProtected>
+      // <AdminProtected>
+      <Organization />
+      // </AdminProtected>
     ),
   },
   // {
@@ -84,9 +81,9 @@ export const routes_admin = [
     path: "customers",
     icon: <HiOutlineUsers className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <Customers />
-      </AdminProtected>
+      // <AdminProtected>
+      <Customers />
+      // </AdminProtected>
     ),
   },
   {
@@ -96,9 +93,9 @@ export const routes_admin = [
     icon: <BsFillCpuFill className="h-7 w-7" />,
     path: "devices",
     component: (
-      <AdminProtected>
-        <DevicesAdmin />
-      </AdminProtected>
+      // <AdminProtected>
+      <DevicesAdmin />
+      // </AdminProtected>
     ),
   },
   {
@@ -108,9 +105,9 @@ export const routes_admin = [
     path: "sim-cards",
     icon: <MdOutlineSimCard className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <Customers />
-      </AdminProtected>
+      // <AdminProtected>
+      <SimCards />
+      // </AdminProtected>
     ),
   },
   {
@@ -120,9 +117,9 @@ export const routes_admin = [
     path: "vehicles",
     icon: <BsTruck className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <VehiclesAdmin />
-      </AdminProtected>
+      // <AdminProtected>
+      <VehiclesAdmin />
+      // </AdminProtected>
     ),
     secondary: true,
   },
@@ -134,9 +131,9 @@ export const routes_admin = [
     path: "feature-set",
     icon: <MdOutlineFeaturedPlayList className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <FeatureSet />
-      </AdminProtected>
+      // <AdminProtected>
+      <FeatureSet />
+      // </AdminProtected>
     ),
   },
   {
@@ -146,9 +143,9 @@ export const routes_admin = [
     path: "analytics-threshold",
     icon: <TbDeviceAnalytics className="h-7 w-7" />,
     component: (
-      <AdminProtected>
-        <AnalyticsThreshold />
-      </AdminProtected>
+      // <AdminProtected>
+      <AnalyticsThreshold />
+      // </AdminProtected>
     ),
   },
 ];
@@ -187,7 +184,7 @@ export const routes_customer = [
     icon: <MdOutlineSimCard className="h-7 w-7" />,
     component: (
       <CustomerProtected>
-        <Customers />
+        <SimCards />
       </CustomerProtected>
     ),
   },

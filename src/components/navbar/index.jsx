@@ -53,8 +53,8 @@ const Navbar = ({ onOpenSidenav }) => {
   const [pwerr, setPwerr] = useState(false);
   const navigate = useNavigate();
   const first_name = Cookies.get("first_name");
-  const user_type = Cookies.get("user_type");
-  const user_uuid = Cookies.get("user_uuid");
+  const user_type = Cookies.get("user_type_id");
+  const user_uuid = Cookies.get("user_id");
   const token = Cookies.get("token");
   const toastRef = useRef(null);
   const toastErr = useRef(null);
@@ -71,36 +71,36 @@ const Navbar = ({ onOpenSidenav }) => {
     }
   }, []);
 
-  useEffect(() => {
-    // Function to fetch notifications
-    const fetchNotifications = () => {
-      axios
-        .get(
-          `${process.env.REACT_APP_API_URL}/notification/get-all-notification/${user_uuid}`,
-          {
-            headers: { authorization: `bearer ${token}` },
-          }
-        )
-        .then((res) => {
-          setNotifications(res.data);
-          setNewNotificationsFetched(true);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    };
+  // useEffect(() => {
+  //   // Function to fetch notifications
+  //   const fetchNotifications = () => {
+  //     axios
+  //       .get(
+  //         `${process.env.REACT_APP_API_URL}/notification/get-all-notification/${user_uuid}`,
+  //         {
+  //           headers: { authorization: `bearer ${token}` },
+  //         }
+  //       )
+  //       .then((res) => {
+  //         setNotifications(res.data);
+  //         setNewNotificationsFetched(true);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //   };
 
-    // Initial fetch
-    fetchNotifications();
+  //   // Initial fetch
+  //   fetchNotifications();
 
-    // Poll for notifications every minute (adjust the interval as needed)
-    const notificationPollingInterval = setInterval(fetchNotifications, 50000);
+  // Poll for notifications every minute (adjust the interval as needed)
+  // const notificationPollingInterval = setInterval(fetchNotifications, 50000);
 
-    // Clean up the interval when the component unmounts
-    return () => {
-      clearInterval(notificationPollingInterval);
-    };
-  }, [token, user_uuid]);
+  // Clean up the interval when the component unmounts
+  //   return () => {
+  //     clearInterval(notificationPollingInterval);
+  //   };
+  // }, [token, user_uuid]);
 
   const handleReadMoreClick = () => {
     setDisplayedNotifications(displayedNotifications + 5);

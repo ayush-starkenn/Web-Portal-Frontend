@@ -527,8 +527,8 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
   const statusBodyTemplate = (rowData) => {
     return (
       <Tag
-        value={rowData.user_status === 1 ? "Active" : "Deactive"}
-        severity={getStatusSeverity(rowData.user_status)}
+        value={rowData.user_is_active === 1 ? "Active" : "Deactive"}
+        severity={getStatusSeverity(rowData.user_is_active)}
       />
     );
   };
@@ -592,18 +592,12 @@ const CustomersList = ({ data, onDelete, onUpdate }) => {
         />
         <Column
           key="user_uuid"
-          field="company_name"
+          field="org"
           header="Company Name"
           className="border-b dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "8rem" }}
         />
-        <Column
-          key="user_uuid"
-          field="phone"
-          header="Contact No."
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "5rem" }}
-        />
+
         <Column
           key="user_uuid"
           field="user_status"

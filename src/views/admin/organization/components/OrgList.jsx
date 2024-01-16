@@ -1,21 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { FilterMatchMode } from "primereact/api";
 import { InputText } from "primereact/inputtext";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const OrgList = () => {
+  const token = Cookies.get("token");
+  console.log("token:::::", token);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     device_type: { value: null, matchMode: FilterMatchMode.IN },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [data, setData] = useState();
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_AWS_URL}/organizationDetailsGet`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+
+      .then((res) => {
+        // const formattedData = res.data.devices.map((item, index) => ({
+        //   ...item,
+        //   serialNo: index + 1,
+        //   key: index + 1,
+        // }));
+        // setData(formattedData);
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [token]);
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
     _filters["global"].value = value;
+
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
@@ -78,7 +106,7 @@ const OrgList = () => {
   return (
     <>
       <DataTable
-        // value={data}
+        value={data}
         header={header}
         removableSort
         paginator
