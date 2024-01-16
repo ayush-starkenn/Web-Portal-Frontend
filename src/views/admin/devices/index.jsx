@@ -43,12 +43,12 @@ const DevicesAdmin = () => {
     axios
       .get(`${process.env.REACT_APP_AWS_URL}/getDevices`, {
         headers: {
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTI3MTdiYWYtYWEyOS0xMWVlLTlmYzgtMGEzM2M4N2QxMDNlIiwiaWF0IjoxNzA1Mjk0MDYxLCJleHAiOjE3MDUzODA0NjF9.ASUqcymuh5U2zwTKsoBEitn1NY-CNrTtfNdzWlgzjGo`,
+          Authorization: token,
         },
       })
 
       .then((res) => {
-        const formattedData = res.data.devices.map((item, index) => ({
+        const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
           key: index + 1,

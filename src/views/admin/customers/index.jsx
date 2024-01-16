@@ -57,11 +57,11 @@ const Customers = () => {
   // Fetching all data
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/customers/get-all-customer`, {
-        headers: { authorization: `bearer ${token}` },
+      .get(`${process.env.REACT_APP_AWS_URL}/getUsers`, {
+        headers: { Authorization: token },
       })
       .then((res) => {
-        const formattedData = res.data.customerData.map((item, index) => ({
+        const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
           full_name: item.first_name + " " + item.last_name,
@@ -69,9 +69,11 @@ const Customers = () => {
             item.state || ""
           } ${item.pincode || ""}`,
           company_name: item.company_name,
-          contact_no: item.phone,
+          org: item.org_id,
+          email: item.email,
         }));
         setData(formattedData);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);

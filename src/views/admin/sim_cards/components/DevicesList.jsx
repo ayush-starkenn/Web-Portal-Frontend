@@ -261,8 +261,8 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const statusBodyTemplate = (rowData) => {
     return (
       <Tag
-        value={rowData.device_status === 1 ? "Active" : "Deactive"}
-        severity={getStatusSeverity(rowData.device_status)}
+        value={rowData.sim_is_active === 1 ? "Active" : "Deactive"}
+        severity={getStatusSeverity(rowData.sim_is_active)}
       />
     );
   };
@@ -370,7 +370,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
             </div>
           )}
           <div className="mt-6 flex justify-end">
-
             <button
               type="submit"
               className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
@@ -408,48 +407,49 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           style={{ minWidth: "4rem", textAlign: "center" }}
         ></Column>
         <Column
-          field="device_id"
-          header="Device ID"
-          sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "12rem" }}
-        ></Column>
-        <Column
-          field="device_type"
-          header="Device Type"
-          sortField="device_type"
+          field="sim_number"
+          header="Sim Number"
           sortable
           className="border-b dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>
+
         <Column
-          field="full_name"
-          header="Customer"
+          header="Sim Tag"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="dark:te xt-gray-200 border-b  dark:bg-navy-800"
           style={{ minWidth: "12rem" }}
           body={(rowData) => (
             <Tag
               className="my-1 mr-2 bg-gray-200 text-gray-800"
-              icon="pi pi-user"
+              // icon="pi pi-user"
               style={{
                 width: "fit-content",
                 height: "25px",
                 lineHeight: "40px",
               }}
-              value={rowData.full_name}
+              value={rowData.sim_tag}
             />
           )}
         ></Column>
 
         <Column
-          field="sim_number"
-          header="Sim Number"
+          field="sim_validity"
+          header="Sim Validity"
+          sortable
+          body={(rowData) => renderCellWithNA(rowData.sim_validity)}
+          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "14rem" }}
+        ></Column>
+        <Column
+          field="sim_data_pack"
+          header="Data Pack"
           sortable
           body={(rowData) => renderCellWithNA(rowData.sim_number)}
           className="border-b dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "14rem" }}
         ></Column>
+
         <Column
           field="device_status"
           header="Status"

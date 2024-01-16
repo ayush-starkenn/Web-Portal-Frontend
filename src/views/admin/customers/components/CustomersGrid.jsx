@@ -141,14 +141,7 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
             </div>
           </div>
           <div className="card-body px-6">
-            <div className="flex justify-between pb-1">
-              <div className="mr-16  flex-shrink-0 font-semibold">
-                <span>Email</span>
-              </div>
-              <div>
-                <span>{item.email}</span>
-              </div>
-            </div>
+            <div className="flex justify-between pb-1"></div>
             <div className="flex justify-between py-1">
               <div className="mr-16 flex-shrink-0 font-semibold">
                 <span>Address</span>
@@ -162,15 +155,15 @@ export default function CustomersGrid({ data, onDelete, onUpdate }) {
                 <span>Company Name</span>
               </div>
               <div>
-                <span>{item.company_name}</span>
+                <span>{item.org}</span>
               </div>
             </div>
             <div className="text-bold flex justify-between py-1">
               <div className="mr-16 flex-shrink-0 font-semibold">
-                <span>Contact No.</span>
+                <span>Email id</span>
               </div>
               <div>
-                <span>{item.phone}</span>
+                <span>{item.email}</span>
               </div>
             </div>
           </div>

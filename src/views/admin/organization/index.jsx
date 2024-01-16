@@ -164,7 +164,7 @@ const Organization = () => {
           </div>
           <div className="mt-8 flex justify-evenly gap-4">
             <div className="card justify-content-center flex-auto">
-              <span className="p-float-label">
+              <span className="p-float-label w-1/2">
                 <Dropdown
                   id="org_type"
                   name="selectedOrg"
@@ -190,7 +190,7 @@ const Organization = () => {
                 </small>
               )}
             </div>
-            <div className="card justify-content-center flex-auto">
+            {/* <div className="card justify-content-center flex-auto">
               <span className="p-float-label">
                 <Dropdown
                   id="plan"
@@ -211,11 +211,11 @@ const Organization = () => {
               </span>
               {emptyFields.includes("selectedPlan") && (
                 <small className="text-red-500">Plan is required.</small>
-              )}
-              {/* <small className="ml-2 text-blue-600 underline dark:text-blue-400">
+              )} */}
+            {/* <small className="ml-2 text-blue-600 underline dark:text-blue-400">
                 <a href="/admin/plans">Explore Plans</a>
               </small> */}
-            </div>
+            {/* </div> */}
           </div>
           <div className="mb-6 ml-2 mt-4">
             <span>Address:</span>
@@ -415,12 +415,12 @@ const Organization = () => {
                 />
 
                 <label htmlFor="org_type" className="dark:text-gray-300">
-                  Organization Type
+                  Contact Type
                 </label>
               </span>
               {emptyFields.includes("selectedOrg") && (
                 <small className="text-red-500">
-                  Organization type is required.
+                  Contact type is required.
                 </small>
               )}
             </div>

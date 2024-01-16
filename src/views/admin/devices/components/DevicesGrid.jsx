@@ -171,7 +171,13 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
                     <span>Device Type</span>
                   </div>
                   <div>
-                    <span>{item.device_type}</span>
+                    <span>
+                      {item.device_type_id === 1
+                        ? "ECU"
+                        : item.device_type_id === 2
+                        ? "DMS"
+                        : "IOT"}
+                    </span>
                   </div>
                 </div>
                 <div className="flex justify-between py-1 font-semibold ">
