@@ -5,8 +5,10 @@ import { BsGrid, BsListUl } from "react-icons/bs";
 import "../../../assets/css/vehicles.css";
 import axios from "axios";
 import Cookies from "js-cookie";
+import VehicleDetialsIndex from './components/VehicleDetails/index';
 
 const VehiclesAdmin = () => {
+  const [vehicleDetails, setVehicleDetails] = useState(false);
   const token = Cookies.get("token");
   const [isListView, setIsListView] = useState(
     localStorage.getItem("viewPreference") === "grid" ? false : true
@@ -40,7 +42,9 @@ const VehiclesAdmin = () => {
 
   return (
     <>
-      <div className="flex justify-between">
+      {vehicleDetails ? (<VehicleDetialsIndex />) : (
+        <>
+        <div className="flex justify-between">
         <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
           Vehicles
         </h4>
@@ -68,11 +72,12 @@ const VehiclesAdmin = () => {
           </button>
         </div>
       </div>
-      {!isListView && <VehiclesGrid data={data} />}
+      {!isListView && <VehiclesGrid data={data} setVehicleDetails = {setVehicleDetails} />}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <VehiclesList data={data} />
-        </div>
+          <VehiclesList data={data} setVehicleDetails = {setVehicleDetails}  />
+        </div>)}
+        </>
       )}
     </>
   );

@@ -9,6 +9,9 @@ import CustomerProtected from "authorization/CustomerProtected";
 import ScheduledReport from "./customer/reports/components/ScheduledReport";
 import Verify from "./auth/EmailVerify";
 import ResetPassword from "./auth/ResetPassword";
+import VehicleDetails from 'views/admin/vehicles/components/VehicleDetails/index.jsx';
+import AdminProtected from "authorization/AdminProteted";
+
 
 const AllRoutes = () => {
   return (
@@ -36,6 +39,10 @@ const AllRoutes = () => {
           </CustomerProtected>
         }
       />
+      {/* <Route path="admin/vehicles-details" element={
+      <AdminProtected>
+      <VehicleDetails />
+      </AdminProtected>} /> */}
     </Routes>
   );
 };
