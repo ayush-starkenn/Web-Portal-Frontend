@@ -89,7 +89,7 @@ const SignIn = () => {
           }
           const token = res.data.token;
           const user_type = res.data.userData.user_type_id;
-          const user_uuid = res.data.userData.user_id;
+          const user_id = res.data.userData.user_id;
           const first_name = res.data.userData.first_name;
           const expirationTime = new Date();
           expirationTime.setDate(expirationTime.getDate() + 7); // Cookie expires in 7 days (1 week)
@@ -98,7 +98,7 @@ const SignIn = () => {
             expires: expirationTime,
             sameSite: "strict",
           });
-          Cookies.set("user_uuid", user_uuid, {
+          Cookies.set("user_id", user_id, {
             expires: expirationTime,
             sameSite: "strict",
           });
