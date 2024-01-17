@@ -41,7 +41,7 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_AWS_URL}/getDevices`, {
+      .get(`${process.env.REACT_APP_AWS_URL}/getAllDevices`, {
         headers: {
           Authorization: token,
         },
