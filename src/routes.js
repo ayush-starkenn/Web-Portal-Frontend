@@ -47,7 +47,7 @@ export const routes_admin = [
     title: "Dashboard",
     layout: "/admin",
     path: "dashboard",
-    icon: <MdOutlineDashboard className="h-7 w-7" />,
+    icon: <MdOutlineDashboard className="h-6 w-6" />,
     component: <Dashboard />,
   },
   {
@@ -55,7 +55,7 @@ export const routes_admin = [
     title: "Organization",
     layout: "/admin",
     path: "organization",
-    icon: <CgOrganisation className="h-7 w-7" />,
+    icon: <CgOrganisation className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <Organization />
@@ -67,7 +67,7 @@ export const routes_admin = [
   //   title: "Plans",
   //   layout: "/admin",
   //   path: "plans",
-  //   icon: <CiWallet className="h-7 w-7" />,
+  //   icon: <CiWallet className="h-6 w-6" />,
   //   component: (
   //     <AdminProtected>
   //       <Plans />
@@ -79,7 +79,7 @@ export const routes_admin = [
     title: "Customers",
     layout: "/admin",
     path: "customers",
-    icon: <HiOutlineUsers className="h-7 w-7" />,
+    icon: <HiOutlineUsers className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <Customers />
@@ -90,7 +90,7 @@ export const routes_admin = [
     name: "Devices",
     title: "Devices",
     layout: "/admin",
-    icon: <BsFillCpuFill className="h-7 w-7" />,
+    icon: <BsFillCpuFill className="h-6 w-6" />,
     path: "devices",
     component: (
       // <AdminProtected>
@@ -103,7 +103,7 @@ export const routes_admin = [
     title: "Sim Cards",
     layout: "/admin",
     path: "sim-cards",
-    icon: <MdOutlineSimCard className="h-7 w-7" />,
+    icon: <MdOutlineSimCard className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <SimCards />
@@ -115,7 +115,7 @@ export const routes_admin = [
     title: "Vehicles",
     layout: "/admin",
     path: "vehicles",
-    icon: <BsTruck className="h-7 w-7" />,
+    icon: <BsTruck className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <VehiclesAdmin />
@@ -138,7 +138,7 @@ export const routes_admin = [
     title: "Feature Set",
     layout: "/admin",
     path: "feature-set",
-    icon: <MdOutlineFeaturedPlayList className="h-7 w-7" />,
+    icon: <MdOutlineFeaturedPlayList className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <FeatureSet />
@@ -150,7 +150,7 @@ export const routes_admin = [
     title: "Analytics Threshold",
     layout: "/admin",
     path: "analytics-threshold",
-    icon: <TbDeviceAnalytics className="h-7 w-7" />,
+    icon: <TbDeviceAnalytics className="h-6 w-6" />,
     component: (
       // <AdminProtected>
       <AnalyticsThreshold />
@@ -166,7 +166,7 @@ export const routes_customer = [
     title: "Dashboard",
     layout: "/customer",
     path: "dashboard",
-    icon: <MdOutlineDashboard className="h-7 w-7" />,
+    icon: <MdOutlineDashboard className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <MainDashboard />
@@ -177,7 +177,7 @@ export const routes_customer = [
     name: "Devices",
     title: "Devices",
     layout: "/customer",
-    icon: <BsFillCpuFill className="h-7 w-7" />,
+    icon: <BsFillCpuFill className="h-6 w-6" />,
     path: "devices",
     component: (
       <CustomerProtected>
@@ -190,7 +190,7 @@ export const routes_customer = [
     title: "Sim Cards",
     layout: "/admin",
     path: "sim-cards",
-    icon: <MdOutlineSimCard className="h-7 w-7" />,
+    icon: <MdOutlineSimCard className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <SimCards />
@@ -202,7 +202,7 @@ export const routes_customer = [
   //   title: "Drivers",
   //   layout: "/customer",
   //   path: "drivers",
-  //   icon: <RiContactsLine className="h-7 w-7" />,
+  //   icon: <RiContactsLine className="h-6 w-6" />,
   //   component: (
   //     <CustomerProtected>
   //       <Drivers />
@@ -214,7 +214,7 @@ export const routes_customer = [
     title: "Vehicles",
     layout: "/customer",
     path: "vehicles/", // Use a wildcard path to match any subroute of "vehicles"
-    icon: <BsTruck className="h-7 w-7" />,
+    icon: <BsTruck className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <Vehicles />
@@ -226,7 +226,7 @@ export const routes_customer = [
     title: "Vehicles",
     layout: "/customer",
     path: "vehicles/ongoing-trip/:trip_id",
-    icon: <BsTruck className="h-7 w-7" />,
+    icon: <BsTruck className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <OngoingTrip />
@@ -238,7 +238,7 @@ export const routes_customer = [
     title: "Vehicles",
     layout: "/customer",
     path: "vehicles/completed-trip/:trip_id",
-    icon: <BsTruck className="h-7 w-7" />,
+    icon: <BsTruck className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <CompletedTrip />
@@ -250,7 +250,7 @@ export const routes_customer = [
   //   title: "Vehicle Logs",
   //   layout: "/customer",
   //   path: "vehicle-logs",
-  //   icon: <DiDatabase className="h-7 w-7" />,
+  //   icon: <DiDatabase className="h-6 w-6" />,
   //   component: (
   //     <CustomerProtected>
   //       <RFIDs />
@@ -262,7 +262,7 @@ export const routes_customer = [
     title: "Alert Triggers",
     layout: "/customer",
     path: "alert-triggers",
-    icon: <RiAlertLine className="h-7 w-7" />,
+    icon: <RiAlertLine className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <Triggers />
@@ -274,7 +274,7 @@ export const routes_customer = [
   //   title: "RFIDs",
   //   layout: "/customer",
   //   path: "RFIDs",
-  //   icon: <BiRfid className="h-7 w-7" />,
+  //   icon: <BiRfid className="h-6 w-6" />,
   //   component: (
   //     <CustomerProtected>
   //       <RFIDs />
@@ -286,7 +286,7 @@ export const routes_customer = [
     title: "Reports",
     layout: "/customer",
     path: "reports",
-    icon: <TbReport className="h-7 w-7" />,
+    icon: <TbReport className="h-6 w-6" />,
     component: (
       <CustomerProtected>
         <Reports />
@@ -298,7 +298,7 @@ export const routes_customer = [
     title: "Contacts",
     layout: "/admin",
     path: "contacts",
-    icon: <MdContactPhone className="h-7 w-7" />,
+    icon: <MdContactPhone className="h-6 w-6" />,
     component: (
         <Contacts />
     ),

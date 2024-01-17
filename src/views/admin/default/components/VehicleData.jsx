@@ -11,7 +11,7 @@ const VehicleData = () => {
           style={{ width: "18vw", height: "494px" }}
           className="custombar2 !sm-max:w-[100vw] mx-2"
         >
-          <h1 className="text-dark pt-3 text-base font-bold dark:text-white">
+          <h1 className="text-dark pt-3 text-base font-semibold dark:text-white">
             All Vehicles
           </h1>
           <div className="my-4 mr-4">

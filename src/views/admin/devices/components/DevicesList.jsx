@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FilterMatchMode } from "primereact/api";
 import { DataTable } from "primereact/datatable";
 import { Toast } from "primereact/toast";
@@ -7,22 +7,23 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { Tag } from "primereact/tag";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
-export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
-  const token = Cookies.get("token");
+export default function DevicesList({
+  data,
+  onEditDevice,
+  deviceType,
+  onDeleteDevice,
+}) {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [editData, setEditData] = useState();
-  const [listCustomers, setListCustomers] = useState([]);
-  const [deviceData, setDeviceData] = useState();
+  const [editData, setEditData] = useState({});
   const [rowId, setRowId] = useState();
-
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const toastRef = useRef(null);
@@ -31,9 +32,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
-
     _filters["global"].value = value;
-
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
@@ -62,7 +61,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
               value={globalFilterValue}
               onChange={onGlobalFilterChange}
               placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
+              className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
             />
             {globalFilterValue && (
               <Button
@@ -79,26 +78,20 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <>
-        <Button
-          icon="pi pi-pencil"
-          rounded
+      <div className="flex text-lg">
+        <FaRegEdit
           tooltip="Edit"
           tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
-          style={{ width: "2rem", height: "2rem" }}
           onClick={() => openDialog(rowData)}
+          className="mr-2 text-gray-700"
         />
-        <Button
-          icon="pi pi-trash"
-          rounded
+        <RiDeleteBin6Line
           tooltip="Delete"
           tooltipOptions={{ position: "mouse" }}
-          style={{ width: "2rem", height: "2rem" }}
-          className="border border-red-600 text-red-600"
           onClick={() => openDeleteDialog(rowData)}
+          className="mx-2 text-red-600"
         />
-      </>
+      </div>
     );
   };
 
@@ -146,7 +139,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   // Opens edit dialog
   const openDialog = (rowData) => {
     setIsDialogVisible(true);
-    getDeviceData(rowData);
+    // getDeviceData(rowData);
     setEditData(rowData);
     setRowId(rowData);
   };
@@ -156,55 +149,17 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
     setIsDialogVisible(false);
   };
 
-  //dropdown options
-  const devicesOptions = [
-    { label: "ECU", value: "ECU" },
-    { label: "IoT", value: "IoT" },
-    { label: "DMS", value: "DMS" },
-  ];
-
   const stateOptions = [
     { label: "Active", value: 1 },
     { label: "Deactive", value: 2 },
   ];
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/devices/get-customerlist`, {
-        headers: { authorization: `bearer ${token}` },
-      })
-      .then((res) => {
-        setListCustomers(res.data.users);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [token, deviceData]);
-
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      key: el.user_uuid,
-      label: el.first_name + " " + el.last_name,
-      value: el.user_uuid,
-    }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const requiredFields = [
-      "device_id",
-      "device_type",
-      "user_uuid",
-      "device_status",
-    ];
-
-    if (editData.device_type !== "ECU") {
-      requiredFields.push("sim_number");
-    }
-
+    const requiredFields = ["device_id", "device_type_id", "device_status"];
     const isAnyFieldEmpty = requiredFields.some((field) => !editData[field]);
 
+    console.log(isAnyFieldEmpty);
     if (isAnyFieldEmpty) {
       toastRef.current.show({
         severity: "error",
@@ -223,24 +178,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       ...prevEditData,
       [name]: value,
     }));
-  };
-
-  const getDeviceData = (rowData) => {
-    axios
-      .get(
-        `${process.env.REACT_APP_API_URL}/devices/get-device-by-id/${rowData.device_id}`,
-        { headers: { authorization: `bearer ${token}` } }
-      )
-      .then((res) => {
-        setDeviceData(res.data.device);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const renderCellWithNA = (data) => {
-    return data ? data : "--";
   };
 
   // Status body
@@ -262,9 +199,12 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       <Tag
         value={rowData.device_status === 1 ? "Active" : "Deactive"}
         severity={getStatusSeverity(rowData.device_status)}
+        className="h-5 rounded-sm text-xs font-normal"
       />
     );
   };
+
+  console.log(editData);
 
   //edit dialog
   return (
@@ -286,7 +226,7 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
                 name="device_id"
                 value={editData?.device_id || ""}
                 onChange={(e) => handleChange(e, "device_id")}
-                className={`border py-2 pl-2 ${
+                className={`border py-2 pl-2 text-sm ${
                   !editData?.device_id ? "p-invalid" : ""
                 }`}
               />
@@ -299,13 +239,13 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
             <span className="p-float-label">
               <Dropdown
                 id="device_type"
-                name="device_type"
-                options={devicesOptions}
+                // name="device_type_id"
+                options={deviceType}
                 optionLabel="label"
                 optionValue="value"
-                value={editData?.device_type || ""}
+                value={editData?.device_type_id || ""}
                 className="p-dropdown border"
-                onChange={(e) => handleChange(e, "device_type")}
+                onChange={(e) => handleChange(e, "device_type_id")}
               />
               <label htmlFor="device_type" className="dark:text-gray-300">
                 Device_type
@@ -316,24 +256,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
           <div className="mx-auto mt-8 w-full">
             <span className="p-float-label">
               <Dropdown
-                id="user_uuid"
-                name="user_uuid"
-                options={Customersoptions()}
-                optionLabel="label"
-                optionValue="value"
-                className="p-dropdown border"
-                value={editData?.user_uuid || ""}
-                onChange={(e) => handleChange(e, "user_uuid")}
-              />
-
-              <label htmlFor="user_uuid" className="dark:text-gray-300">
-                Customer List
-              </label>
-            </span>
-          </div>
-          <div className="mx-auto mt-8 w-full">
-            <span className="p-float-label">
-              <Dropdown
                 id="status"
                 name="device_status"
                 options={stateOptions}
@@ -341,7 +263,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
                 optionValue="value"
                 className="p-dropdown border"
                 value={editData?.device_status || ""}
-                placeholder={deviceData?.device_status}
                 onChange={(e) => handleChange(e, "device_status")}
               />
               <label htmlFor="status" className="dark:text-gray-300">
@@ -350,24 +271,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
             </span>
           </div>
 
-          {editData?.device_type !== "ECU" && (
-            <div className={`mx-auto mt-8 w-full`}>
-              <span className="p-float-label">
-                <InputText
-                  id="device_id"
-                  name="device_id"
-                  value={editData?.sim_number || ""}
-                  onChange={(e) => handleChange(e, "sim_number")}
-                  className={`border py-2 pl-2 ${
-                    !editData?.sim_number ? "p-invalid" : ""
-                  }`}
-                />
-                <label htmlFor="device_id" className="dark:text-gray-300">
-                  Sim Number
-                </label>
-              </span>
-            </div>
-          )}
           <div className="mt-6 flex justify-end">
             <button
               type="submit"
@@ -402,79 +305,48 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
         <Column
           field="serialNo"
           header="Sr. No."
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "4rem", textAlign: "center" }}
+          className="border-b py-1 text-sm dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "4rem", textAlign: "left" }}
         ></Column>
         <Column
           field="device_id"
           header="Device ID"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "12rem" }}
         ></Column>
         <Column
+          field="device_type_id"
           header="Device Type"
-          sortField="device_type"
+          sortField="device_type_id"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
           body={(rowData) => {
-            const deviceType = rowData.device_type_id;
-            let label;
-            if (deviceType === 1) {
-              label = "ECU";
-            } else if (deviceType === 2) {
-              label = "DMS";
-            } else if (deviceType === 3) {
-              label = "IOT";
-            } else {
-              label = "Unknown";
-            }
+            const deviceTypeId = rowData.device_type_id;
+            const matchedDevice = Array.isArray(deviceType)
+              ? deviceType.find((type) => type.value === deviceTypeId)
+              : null;
 
-            return <span>{label}</span>;
+            return (
+              <span>{matchedDevice ? matchedDevice.label : "Unknown"}</span>
+            );
           }}
         ></Column>
-        <Column
-          field="full_name"
-          header="Customer"
-          sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "12rem" }}
-          body={(rowData) => (
-            <Tag
-              className="my-1 mr-2 bg-gray-200 text-gray-800"
-              icon="pi pi-user"
-              style={{
-                width: "fit-content",
-                height: "25px",
-                lineHeight: "40px",
-              }}
-              value={rowData.full_name}
-            />
-          )}
-        ></Column>
 
-        <Column
-          field="sim_number"
-          header="Sim Number"
-          sortable
-          body={(rowData) => renderCellWithNA(rowData.sim_number)}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "14rem" }}
-        ></Column>
         <Column
           field="device_status"
           header="Status"
           body={statusBodyTemplate}
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>
 
         <Column
           body={actionBodyTemplate}
           header="Action"
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "9rem" }}
         ></Column>
       </DataTable>

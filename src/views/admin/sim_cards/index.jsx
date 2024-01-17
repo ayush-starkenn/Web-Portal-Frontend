@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import DevicesList from "./components/DevicesList";
-import DevicesGrid from "./components/DevicesGrid";
+import DevicesList from "./components/SimList";
+import DevicesGrid from "./components/SimGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 import axios from "axios";
 import { Toast } from "primereact/toast";

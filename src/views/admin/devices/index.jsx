@@ -12,7 +12,7 @@ import { FiPlus } from "react-icons/fi";
 
 const DevicesAdmin = () => {
   const token = Cookies.get("token");
-  const userUUID = Cookies.get("user_uuid");
+  const user_id = Cookies.get("user_id");
   const [devices, setDevices] = useState(true);
   const [data, setData] = useState([]);
   const [isListView, setIsListView] = useState(
@@ -21,31 +21,28 @@ const DevicesAdmin = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     device_id: false,
-    device_type: false,
-    user_uuid: false,
-    status: false,
-    sim_number: false,
+    device_type_id: false,
   });
-  const requiredFields = ["device_id", "device_type", "user_uuid", "status"];
+
   const [addData, setAddData] = useState({
     device_id: "",
-    device_type: "",
-    user_uuid: "",
-    status: "",
-    sim_number: "",
+    device_type_id: "",
   });
-  const [listCustomers, setListCustomers] = useState([]);
+  const [devicetypes, setDeviceTypes] = useState([]);
   const toastRef = useRef(null);
 
   //Fetching all data
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_AWS_URL}/getAllDevices`, {
-        headers: {
-          Authorization: token,
-        },
-      })
+    axios.get(
+        `${process.env.REACT_APP_AWS_URL}/getAllDevices`,
+
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
 
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
@@ -54,22 +51,24 @@ const DevicesAdmin = () => {
           key: index + 1,
         }));
         setData(formattedData);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [token, devices]);
+  }, [token, user_id, devices]);
 
   // Edit Devices
   const handleEditDevice = (deviceId, editedDevice) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/devices/edit-device/${deviceId}`,
-        { ...editedDevice, userUUID },
-        { headers: { authorization: `bearer ${token}` } }
+        `${process.env.REACT_APP_AWS_URL}/editDevice/${deviceId}`,
+        { ...editedDevice },
+        { headers: { Authorization: token } }
       )
       .then((res) => {
         setDevices(editedDevice);
+
         toastRef.current.show({
           severity: "success",
           summary: "Success",
@@ -102,7 +101,7 @@ const DevicesAdmin = () => {
     axios
       .put(
         `${process.env.REACT_APP_API_URL}/devices/delete-device/${deviceId}`,
-        { user_uuid: userUUID },
+        { user_uuid: user_id },
         { headers: { authorization: `bearer ${token}` } }
       )
       .then((res) => {
@@ -128,10 +127,7 @@ const DevicesAdmin = () => {
   const resetFormData = () => {
     setAddData({
       device_id: "",
-      device_type: "",
-      user_uuid: "",
-      status: "",
-      sim_number: "",
+      device_type_id: "",
     });
   };
 
@@ -155,110 +151,61 @@ const DevicesAdmin = () => {
     setIsDialogVisible(false);
   };
 
-  //Dropdown options
-  const devicesOptions = [
-    { label: "ECU", value: "ECU" },
-    { label: "IoT", value: "IoT" },
-    { label: "DMS", value: "DMS" },
-  ];
-
-  const stateOptions = [
-    { label: "Active", value: "1" },
-    { label: "Deactive", value: "2" },
-  ];
-
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/devices/get-customerlist`, {
-        headers: { authorization: `bearer ${token}` },
+      .get(`${process.env.REACT_APP_AWS_URL}/deviceTypeData`, {
+        headers: { Authorization: token },
       })
       .then((res) => {
-        setListCustomers(res.data.users);
+        setDeviceTypes(res.data.data);
       })
       .catch((err) => {
         console.log(err);
       });
   }, [token]);
 
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      key: el.user_uuid,
-      label: el.first_name + " " + el.last_name,
-      value: el.user_uuid,
+  const devicesOptions = () => {
+    return devicetypes?.map((el) => ({
+      label: el.device_name,
+      value: el.device_type_id,
     }));
   };
 
   // Add customer api call
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      axios
-        .post(
-          `${process.env.REACT_APP_API_URL}/devices/add-device`,
-          { ...addData, userUUID: userUUID },
-          {
-            headers: { authorization: `bearer ${token}` },
-          }
-        )
-        .then((res) => {
-          setDevices(addData);
-          toastRef.current.show({
-            severity: "success",
-            summary: "Success",
-            detail: `Device ${addData.device_id} Added successfully`,
-            life: 3000,
-          });
-          closeDialog();
-        })
-        .catch((err) => {
-          toastRef.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "DeviceId or Sim number Already exists.",
-            life: 3000,
-          });
+
+    axios
+      .post(
+        `${process.env.REACT_APP_AWS_URL}/createDevice`,
+        { ...addData },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then(() => {
+        setDevices(addData);
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: `Device ${addData.device_id} added successfully`,
+          life: 3000,
         });
-    } else {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Incomplete form",
-        detail: "Please fill in all the required details.",
-        life: 3000,
+        closeDialog();
+      })
+      .catch((err) => {
+        toastRef.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: err.response.data.message,
+          life: 3000,
+        });
       });
-      // Set validation errors for the required fields
-      const errors = {};
-      requiredFields.forEach((field) => {
-        errors[field] = !addData[field].trim();
-      });
-      setValidationErrors(errors);
-    }
-  };
-
-  const handleValidation = (name, value) => {
-    const errors = { ...validationErrors };
-    errors[name] = !value.trim();
-    setValidationErrors(errors);
-  };
-
-  // Check if all fields are valid
-  const isFormValid = () => {
-    // Check if all required fields are filled
-    const requiredFieldsFilled = requiredFields.every(
-      (field) => !!addData[field].trim()
-    );
-
-    // If device type is "DMS" or "IoT," also check if "sim_number" is filled
-    const isSimNumberRequired =
-      addData.device_type === "DMS" || addData.device_type === "IoT";
-    const simNumberFilled = !isSimNumberRequired || !!addData.sim_number.trim();
-
-    return requiredFieldsFilled && simNumberFilled;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAddData({ ...addData, [name]: value });
-    handleValidation(name, value);
   };
 
   //add device dialog
@@ -266,7 +213,7 @@ const DevicesAdmin = () => {
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <div className="flex justify-between">
-        <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
+        <h4 className="text-dark pt-1 text-xl font-semibold dark:text-white">
           Devices
         </h4>
         <Dialog
@@ -303,108 +250,31 @@ const DevicesAdmin = () => {
             </div>
             <div
               className={`mx-auto mt-8 w-full ${
-                validationErrors.device_type ? "p-error" : ""
+                validationErrors.device_type_id ? "p-error" : ""
               }`}
             >
               <span className="p-float-label">
                 <Dropdown
                   id="device_type"
-                  name="device_type"
-                  options={devicesOptions}
+                  name="device_type_id"
+                  options={devicesOptions()}
                   optionLabel="label"
                   optionValue="value"
                   className={`p-dropdown border ${
-                    validationErrors.device_type ? "border-red-600" : ""
+                    validationErrors.device_type_id ? "border-red-600" : ""
                   }`}
                   onChange={handleChange}
-                  value={addData.device_type}
+                  value={addData.device_type_id}
                 />
                 <label htmlFor="device_type" className="dark:text-gray-300">
                   Device Type
                 </label>
               </span>
-              {validationErrors.device_type && (
+              {validationErrors.device_type_id && (
                 <small className="text-red-600">Device Type is required</small>
               )}
             </div>
 
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.user_uuid ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <Dropdown
-                  id="user_uuid"
-                  name="user_uuid"
-                  options={Customersoptions()}
-                  optionLabel="label"
-                  optionValue="value"
-                  className={`p-dropdown border ${
-                    validationErrors.user_uuid ? "border-red-600" : ""
-                  }`}
-                  onChange={handleChange}
-                  value={addData.user_uuid}
-                />
-                <label htmlFor="user_uuid" className="dark:text-gray-300">
-                  Select Customer
-                </label>
-              </span>
-              {validationErrors.user_uuid && (
-                <small className="text-red-600">Customer is required</small>
-              )}
-            </div>
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.status ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <Dropdown
-                  id="status"
-                  name="status"
-                  options={stateOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  className={`p-dropdown border ${
-                    validationErrors.status ? "border-red-600" : ""
-                  }`}
-                  onChange={handleChange}
-                  value={addData.status}
-                />
-                <label htmlFor="status" className="dark:text-gray-300">
-                  Status
-                </label>
-              </span>
-              {validationErrors.status && (
-                <small className="text-red-600">Status is required</small>
-              )}
-            </div>
-            {addData.device_type !== "ECU" && (
-              <div
-                className={`mx-auto mt-8 w-full ${
-                  validationErrors.sim_number ? "p-error" : ""
-                }`}
-              >
-                <span className="p-float-label">
-                  <InputText
-                    id="sim_number"
-                    name="sim_number"
-                    keyfilter="pint"
-                    onChange={handleChange}
-                    className={`border py-2 pl-2 ${
-                      validationErrors.sim_number ? "border-red-600" : ""
-                    }`}
-                  />
-                  <label htmlFor="device_id" className="dark:text-gray-300">
-                    Sim Number
-                  </label>
-                </span>
-                {validationErrors.sim_number && (
-                  <small className="text-red-600">Sim number is required</small>
-                )}
-              </div>
-            )}
             <div className="mt-6 flex justify-center">
               <button
                 type="submit"
@@ -415,12 +285,12 @@ const DevicesAdmin = () => {
             </div>
           </form>
         </Dialog>
-        <div className="pt-3">
+        <div className="pt-2">
           <button
             className={`${
               isListView === true
-                ? "list-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "list-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "list-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "list-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -429,8 +299,8 @@ const DevicesAdmin = () => {
           <button
             className={`${
               isListView === false
-                ? "grid-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "grid-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "grid-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "grid-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -439,11 +309,11 @@ const DevicesAdmin = () => {
         </div>
       </div>
       <button
-        className="mt-2 flex h-10 items-center rounded-lg bg-blue-500 px-3 py-2 text-left font-semibold text-white hover:bg-blue-600"
+        className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
         onClick={openDialog}
       >
-        <FiPlus className="mr-2" />
-        New Device
+        <FiPlus />
+        &nbsp;New Device
       </button>
       {!isListView && (
         <DevicesGrid
@@ -456,6 +326,7 @@ const DevicesAdmin = () => {
         <div className="opacity-100 transition-opacity duration-500">
           <DevicesList
             data={data}
+            deviceType={devicesOptions()}
             onEditDevice={handleEditDevice}
             onDeleteDevice={handleDeleteDevice}
           />
