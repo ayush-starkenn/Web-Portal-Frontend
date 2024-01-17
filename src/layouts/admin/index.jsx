@@ -72,11 +72,11 @@ export default function Admin(props) {
           {...rest}
         />
         <main
-          className={`mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[125px]`}
+          className={`mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[100px]`}
         >
           {/* Routes */}
           <div className="h-full">
-            <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
+            <div className="mx-auto mb-auto h-full min-h-[84vh] p-2 pt-3 md:pr-2">
               <Routes>
                 {getRoutes(routes_admin)}
                 <Route

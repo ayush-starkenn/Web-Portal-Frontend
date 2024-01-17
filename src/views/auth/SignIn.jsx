@@ -78,15 +78,8 @@ const SignIn = () => {
         .post(`${process.env.REACT_APP_AWS_URL}/loginUser`, data)
         // .post(`${process.env.REACT_APP_API_URL}/login`, data)
         .then((res) => {
-          console.log(res.data.token);
-          if (
-            res.data.userData.user_type_id ===
-            "e1bf1f49-9e34-11ee-9fc8-0a33c87d103e"
-          ) {
-            navigate("/admin/dashboard");
-          } else {
-            console.log("no sapna");
-          }
+          navigate("/admin/dashboard");
+
           const token = res.data.token;
           const user_type = res.data.userData.user_type_id;
           const user_id = res.data.userData.user_id;
