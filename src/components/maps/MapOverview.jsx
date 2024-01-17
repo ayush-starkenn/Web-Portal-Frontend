@@ -89,7 +89,7 @@ const MapOverview = () => {
         {filters.map((f, index) => (
           <TabPanel
             key={index}
-            className="!sm-max:px-[-10px] mx-auto rounded-sm sm-max:mx-[-12px]"
+            className="!sm-max:px-[-10px] mx-auto rounded-sm text-sm sm-max:mx-[-12px]"
             header={f.name}
           >
             <MapContainer

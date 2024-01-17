@@ -35,9 +35,9 @@ const DevicesAdmin = () => {
 
   useEffect(() => {
     axios
-      .post(
-        `${process.env.REACT_APP_AWS_URL}/getUserDevices`,
-        { user_id },
+      .get(
+        `${process.env.REACT_APP_AWS_URL}/getAllDevices`,
+
         {
           headers: {
             Authorization: token,
@@ -46,14 +46,13 @@ const DevicesAdmin = () => {
       )
 
       .then((res) => {
-        const formattedData = res.data.data.deviceData.devices.map(
-          (item, index) => ({
-            ...item,
-            serialNo: index + 1,
-            key: index + 1,
-          })
-        );
+        const formattedData = res.data.data.map((item, index) => ({
+          ...item,
+          serialNo: index + 1,
+          key: index + 1,
+        }));
         setData(formattedData);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);
@@ -215,7 +214,7 @@ const DevicesAdmin = () => {
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <div className="flex justify-between">
-        <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
+        <h4 className="text-dark pt-1 text-xl font-semibold dark:text-white">
           Devices
         </h4>
         <Dialog
@@ -287,12 +286,12 @@ const DevicesAdmin = () => {
             </div>
           </form>
         </Dialog>
-        <div className="pt-3">
+        <div className="pt-2">
           <button
             className={`${
               isListView === true
-                ? "list-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "list-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "list-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "list-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -301,8 +300,8 @@ const DevicesAdmin = () => {
           <button
             className={`${
               isListView === false
-                ? "grid-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "grid-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "grid-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "grid-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -311,11 +310,11 @@ const DevicesAdmin = () => {
         </div>
       </div>
       <button
-        className="mt-2 flex h-10 items-center rounded-lg bg-blue-500 px-3 py-2 text-left font-semibold text-white hover:bg-blue-600"
+        className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
         onClick={openDialog}
       >
-        <FiPlus className="mr-2" />
-        New Device
+        <FiPlus />
+        &nbsp;New Device
       </button>
       {!isListView && (
         <DevicesGrid

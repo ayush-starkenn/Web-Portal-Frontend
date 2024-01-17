@@ -50,7 +50,7 @@ const Sidebar = ({ open, onClose }) => {
     )} */}
 
       <div className={`mx-[37px] flex items-center`}>
-        <div className="ml-1 mt-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white"></div>
+        <div className="ml-1 h-2.5 font-poppins text-[26px] font-bold uppercase text-navy-700 dark:text-white"></div>
       </div>
       {/* Nav item */}
 
@@ -58,7 +58,7 @@ const Sidebar = ({ open, onClose }) => {
         <div
           className={`${
             isMobile ? "sm:hidden" : "sm:flex"
-          } duration-1200 e fixed z-40 flex min-h-full  flex-col bg-white shadow-2xl shadow-white/5 transition-opacity duration-500 ease-in-out  dark:!bg-navy-800 dark:text-white dark:shadow-none ${
+          } duration-1200  fixed z-40 flex h-full min-h-full flex-col bg-white shadow-2xl shadow-white/5 transition-opacity duration-500 ease-in-out  dark:!bg-navy-800 dark:text-white dark:shadow-none ${
             open ? "opacity-100" : "opacity-0"
           } ${isHovered ? "w-[192px]" : "w-fit"}`}
         >
@@ -69,7 +69,7 @@ const Sidebar = ({ open, onClose }) => {
           >
             {!isHovered ? (
               <RiMenu2Fill
-                className="mx-2 my-auto w-10 cursor-pointer text-2xl text-gray-600 transition duration-700 ease-in-out"
+                className="mx-2 mt-[-13px] h-6 w-6 cursor-pointer text-gray-600 transition duration-700 ease-in-out"
                 onClick={isMobile ? onClose : handleMouseEnter}
               />
             ) : (

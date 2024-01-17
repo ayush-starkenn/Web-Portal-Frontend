@@ -8,6 +8,8 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 export default function DevicesList({
   data,
@@ -59,7 +61,7 @@ export default function DevicesList({
               value={globalFilterValue}
               onChange={onGlobalFilterChange}
               placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
+              className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
             />
             {globalFilterValue && (
               <Button
@@ -76,26 +78,20 @@ export default function DevicesList({
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <>
-        <Button
-          icon="pi pi-pencil"
-          rounded
+      <div className="flex text-lg">
+        <FaRegEdit
           tooltip="Edit"
           tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
-          style={{ width: "2rem", height: "2rem" }}
           onClick={() => openDialog(rowData)}
+          className="mr-2 text-gray-700"
         />
-        <Button
-          icon="pi pi-trash"
-          rounded
+        <RiDeleteBin6Line
           tooltip="Delete"
           tooltipOptions={{ position: "mouse" }}
-          style={{ width: "2rem", height: "2rem" }}
-          className="border border-red-600 text-red-600"
           onClick={() => openDeleteDialog(rowData)}
+          className="mx-2 text-red-600"
         />
-      </>
+      </div>
     );
   };
 
@@ -203,6 +199,7 @@ export default function DevicesList({
       <Tag
         value={rowData.device_status === 1 ? "Active" : "Deactive"}
         severity={getStatusSeverity(rowData.device_status)}
+        className="h-5 rounded-sm text-xs font-normal"
       />
     );
   };
@@ -229,7 +226,7 @@ export default function DevicesList({
                 name="device_id"
                 value={editData?.device_id || ""}
                 onChange={(e) => handleChange(e, "device_id")}
-                className={`border py-2 pl-2 ${
+                className={`border py-2 pl-2 text-sm ${
                   !editData?.device_id ? "p-invalid" : ""
                 }`}
               />
@@ -308,14 +305,14 @@ export default function DevicesList({
         <Column
           field="serialNo"
           header="Sr. No."
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b py-1 text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "4rem", textAlign: "left" }}
         ></Column>
         <Column
           field="device_id"
           header="Device ID"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "12rem" }}
         ></Column>
         <Column
@@ -323,7 +320,7 @@ export default function DevicesList({
           header="Device Type"
           sortField="device_type_id"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
           body={(rowData) => {
             const deviceTypeId = rowData.device_type_id;
@@ -342,14 +339,14 @@ export default function DevicesList({
           header="Status"
           body={statusBodyTemplate}
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>
 
         <Column
           body={actionBodyTemplate}
           header="Action"
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "9rem" }}
         ></Column>
       </DataTable>
