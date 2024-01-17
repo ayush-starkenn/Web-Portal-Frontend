@@ -14,7 +14,7 @@ import Vehicles from "views/customer/vehicles";
 // import RFIDs from "views/customer/rfids";
 import Devices from "views/customer/devices";
 import Triggers from "views/customer/alert-triggers";
-import Contacts from "views/customer/contacts";
+import Contacts from "views/admin/contacts";
 import Reports from "views/customer/reports";
 
 // Icon Imports
@@ -123,7 +123,16 @@ export const routes_admin = [
     ),
     secondary: true,
   },
-
+  {
+    name: "Contacts",
+    title: "Contacts",
+    layout: "/admin",
+    path: "contacts",
+    icon: <MdContactPhone className="h-7 w-7" />,
+    component: (
+        <Contacts />
+    ),
+  },
   {
     name: "Feature Set",
     title: "Feature Set",
@@ -287,13 +296,11 @@ export const routes_customer = [
   {
     name: "Contacts",
     title: "Contacts",
-    layout: "/customer",
+    layout: "/admin",
     path: "contacts",
     icon: <MdContactPhone className="h-6 w-6" />,
     component: (
-      <CustomerProtected>
         <Contacts />
-      </CustomerProtected>
     ),
   },
 ];

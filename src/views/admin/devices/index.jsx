@@ -34,8 +34,7 @@ const DevicesAdmin = () => {
   //Fetching all data
 
   useEffect(() => {
-    axios
-      .get(
+    axios.get(
         `${process.env.REACT_APP_AWS_URL}/getAllDevices`,
 
         {
