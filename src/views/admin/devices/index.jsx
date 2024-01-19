@@ -35,12 +35,17 @@ const DevicesAdmin = () => {
 
   //Fetching all data
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_AWS_URL}/getAllDevices`, {
-        headers: {
-          Authorization: token,
-        },
-      })
+
+    axios.get(
+        `${process.env.REACT_APP_AWS_URL}/getAllDevices`,
+
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+
 
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
