@@ -10,6 +10,8 @@ import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { TiInputChecked } from "react-icons/ti";
+import { MdDeleteOutline } from "react-icons/md";
 
 export default function DevicesList({
   data,
@@ -48,29 +50,34 @@ export default function DevicesList({
   const openDeleteDialog = (rowData) => {
     setSelectedDevice(rowData);
     setDeleteDialogVisible(true);
+    setRowId(rowData);
+    console.log(selectedDevice);
   };
 
   //Searchbox
   const renderHeader = () => {
     return (
-      <div className="my-4 flex justify-end">
-        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+      <div className="my-4 flex justify-end align-middle">
+        <div className="flex items-center">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-              placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
-            />
-            {globalFilterValue && (
+          </span>
+
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Keyword Search"
+            className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
+          />
+          {globalFilterValue && (
+            <div>
               <Button
                 icon="pi pi-times"
-                className="p-button-rounded p-button-text dark:text-gray-50 dark:hover:text-gray-50"
+                className="p-button-rounded p-button-text py-auto dark:text-gray-50 dark:hover:text-gray-50"
                 onClick={clearSearch}
               />
-            )}
-          </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -80,16 +87,14 @@ export default function DevicesList({
     return (
       <div className="flex text-lg">
         <FaRegEdit
-          tooltip="Edit"
-          tooltipOptions={{ position: "mouse" }}
+          title="Edit"
           onClick={() => openDialog(rowData)}
-          className="mr-2 text-gray-700"
+          className="mr-2 cursor-pointer text-gray-700"
         />
         <RiDeleteBin6Line
-          tooltip="Delete"
-          tooltipOptions={{ position: "mouse" }}
+          title="Delete"
           onClick={() => openDeleteDialog(rowData)}
-          className="mx-2 text-red-600"
+          className="mx-2 cursor-pointer text-red-600"
         />
       </div>
     );
@@ -113,25 +118,28 @@ export default function DevicesList({
       <Dialog
         visible={visible}
         onHide={onHide}
-        header="Confirm Delete"
+        header="Confirm Deletion"
         footer={
           <div>
             <Button
               label="Delete"
-              icon="pi pi-check"
-              className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white"
+              className="mr-2 bg-red-500 px-2 py-1 text-xs text-white dark:hover:bg-red-500 dark:hover:text-white"
               onClick={handleConfirmDelete}
             />
             <Button
               label="Cancel"
-              icon="pi pi-times"
-              className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850"
+              className="bg-gray-700 px-2 py-1 text-xs text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850"
               onClick={onHide}
             />
           </div>
         }
       >
-        <div>Are you sure you want to delete {selectedDevice?.device_id}?</div>
+        <div className="flex items-center">
+          <MdDeleteOutline className="text-2xl text-blue-400" />
+          <span className="text-sm font-semibold">
+            Are you sure you want to delete {selectedDevice?.device_id}?
+          </span>
+        </div>
       </Dialog>
     );
   };
@@ -203,6 +211,15 @@ export default function DevicesList({
       />
     );
   };
+  const availabilityTemplate = (rowData) => {
+    return (
+      <TiInputChecked
+        className={`h-6 w-6 ${
+          rowData.linked === null ? "text-green-600" : "text-red-500"
+        }`}
+      />
+    );
+  };
 
   console.log(editData);
 
@@ -212,23 +229,24 @@ export default function DevicesList({
       <Dialog
         visible={isDialogVisible}
         onHide={closeDialog}
-        style={{ width: "45rem" }}
+        style={{ width: "35rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Edit the Device"
         modal
         className="p-fluid dark:bg-gray-900"
       >
         <form onSubmit={handleSubmit} className="mx-auto">
-          <div className="mx-auto mt-8 w-full">
+          <div className="mt-8 w-auto">
             <span className="p-float-label">
               <InputText
                 id="device_id"
                 name="device_id"
                 value={editData?.device_id || ""}
                 onChange={(e) => handleChange(e, "device_id")}
-                className={`border py-2 pl-2 text-sm ${
+                className={`text-normal border bg-[#ccc] py-2 pl-2 font-bold text-navy-900 ${
                   !editData?.device_id ? "p-invalid" : ""
                 }`}
+                disabled
               />
               <label htmlFor="device_id" className="dark:text-gray-300">
                 Device ID
@@ -239,16 +257,16 @@ export default function DevicesList({
             <span className="p-float-label">
               <Dropdown
                 id="device_type"
-                // name="device_type_id"
+                name="device_type_id"
                 options={deviceType}
                 optionLabel="label"
                 optionValue="value"
                 value={editData?.device_type_id || ""}
-                className="p-dropdown border"
+                className="p-dropdown h-10 border"
                 onChange={(e) => handleChange(e, "device_type_id")}
               />
               <label htmlFor="device_type" className="dark:text-gray-300">
-                Device_type
+                Device Type
               </label>
             </span>
           </div>
@@ -261,7 +279,7 @@ export default function DevicesList({
                 options={stateOptions}
                 optionLabel="label"
                 optionValue="value"
-                className="p-dropdown border"
+                className="p-dropdown h-10 border"
                 value={editData?.device_status || ""}
                 onChange={(e) => handleChange(e, "device_status")}
               />
@@ -274,7 +292,7 @@ export default function DevicesList({
           <div className="mt-6 flex justify-end">
             <button
               type="submit"
-              className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+              className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
             >
               Update
             </button>
@@ -293,12 +311,7 @@ export default function DevicesList({
         rowsPerPageOptions={[5, 10, 25]}
         filters={filters}
         filterDisplay="menu"
-        globalFilterFields={[
-          "device_id",
-          "device_type",
-          "sim_number",
-          "user_uuid",
-        ]}
+        globalFilterFields={["device_id", "device_type_id"]}
         emptyMessage="No devices found."
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
       >
@@ -339,6 +352,14 @@ export default function DevicesList({
           header="Status"
           body={statusBodyTemplate}
           sortable
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "10rem" }}
+        ></Column>
+        <Column
+          field="linked"
+          header="Availability"
+          sortable
+          body={availabilityTemplate}
           className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>

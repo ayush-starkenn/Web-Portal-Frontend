@@ -9,6 +9,8 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import Cookies from "js-cookie";
 import { FiPlus } from "react-icons/fi";
+import PreloaderList from "components/skeleton-preloader/PreloaderList";
+import PreloaderGrid from "components/skeleton-preloader/PreloaderGrid";
 
 const DevicesAdmin = () => {
   const token = Cookies.get("token");
@@ -23,7 +25,7 @@ const DevicesAdmin = () => {
     device_id: false,
     device_type_id: false,
   });
-
+  const [loaded, setLoaded] = useState(false);
   const [addData, setAddData] = useState({
     device_id: "",
     device_type_id: "",
@@ -32,8 +34,8 @@ const DevicesAdmin = () => {
   const toastRef = useRef(null);
 
   //Fetching all data
-
   useEffect(() => {
+
     axios.get(
         `${process.env.REACT_APP_AWS_URL}/getAllDevices`,
 
@@ -44,6 +46,7 @@ const DevicesAdmin = () => {
         }
       )
 
+
       .then((res) => {
         const formattedData = res.data.data.map((item, index) => ({
           ...item,
@@ -52,6 +55,7 @@ const DevicesAdmin = () => {
         }));
         setData(formattedData);
         console.log(res);
+        setLoaded(true);
       })
       .catch((err) => {
         console.log(err);
@@ -66,9 +70,8 @@ const DevicesAdmin = () => {
         { ...editedDevice },
         { headers: { Authorization: token } }
       )
-      .then((res) => {
+      .then(() => {
         setDevices(editedDevice);
-
         toastRef.current.show({
           severity: "success",
           summary: "Success",
@@ -99,12 +102,10 @@ const DevicesAdmin = () => {
   // Delete api call
   const handleDeleteDevice = (deviceId) => {
     axios
-      .put(
-        `${process.env.REACT_APP_API_URL}/devices/delete-device/${deviceId}`,
-        { user_uuid: user_id },
-        { headers: { authorization: `bearer ${token}` } }
-      )
-      .then((res) => {
+      .put(`${process.env.REACT_APP_AWS_URL}/deleteDevice/${deviceId}`, null, {
+        headers: { Authorization: token },
+      })
+      .then(() => {
         setDevices(data);
         toastRef.current.show({
           severity: "success",
@@ -174,7 +175,22 @@ const DevicesAdmin = () => {
   // Add customer api call
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!addData.device_id || !addData.device_type_id) {
+      setValidationErrors({
+        device_id: !addData.device_id,
+        device_type_id: !addData.device_type_id,
+      });
 
+      // Display toast for validation error
+      toastRef.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "All fields are required",
+        life: 3000,
+      });
+
+      return; // Stop further processing
+    }
     axios
       .post(
         `${process.env.REACT_APP_AWS_URL}/createDevice`,
@@ -206,6 +222,10 @@ const DevicesAdmin = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAddData({ ...addData, [name]: value });
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: false,
+    }));
   };
 
   //add device dialog
@@ -219,7 +239,7 @@ const DevicesAdmin = () => {
         <Dialog
           visible={isDialogVisible}
           onHide={closeDialog}
-          style={{ width: "45rem" }}
+          style={{ width: "35rem" }}
           breakpoints={{ "960px": "75vw", "641px": "90vw" }}
           header="Fill the details"
           modal
@@ -227,7 +247,7 @@ const DevicesAdmin = () => {
         >
           <form onSubmit={handleSubmit} className="mx-auto">
             <div
-              className={`mx-auto mt-8 w-full ${
+              className={`mx-auto mb-2 mt-8 w-full ${
                 validationErrors.device_id ? "p-error" : ""
               }`}
             >
@@ -236,7 +256,7 @@ const DevicesAdmin = () => {
                   id="device_id"
                   name="device_id"
                   onChange={handleChange}
-                  className={`border py-2 pl-2 ${
+                  className={`border py-1.5 pl-2 text-sm ${
                     validationErrors.device_id ? "border-red-600" : ""
                   }`}
                 />
@@ -244,8 +264,12 @@ const DevicesAdmin = () => {
                   Device ID
                 </label>
               </span>
-              {validationErrors.device_id && (
+              {validationErrors.device_id ? (
                 <small className="text-red-600">Device ID is required</small>
+              ) : (
+                <span className="pl-1 text-xs text-blue-500">
+                  Device ID cannot be edited.
+                </span>
               )}
             </div>
             <div
@@ -260,7 +284,7 @@ const DevicesAdmin = () => {
                   options={devicesOptions()}
                   optionLabel="label"
                   optionValue="value"
-                  className={`p-dropdown border ${
+                  className={`p-dropdown h-9 border text-sm ${
                     validationErrors.device_type_id ? "border-red-600" : ""
                   }`}
                   onChange={handleChange}
@@ -275,10 +299,10 @@ const DevicesAdmin = () => {
               )}
             </div>
 
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-end">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
               >
                 Add Device
               </button>
@@ -316,20 +340,35 @@ const DevicesAdmin = () => {
         &nbsp;New Device
       </button>
       {!isListView && (
-        <DevicesGrid
-          data={data}
-          onEditDevice={handleEditDevice}
-          onDeleteDevice={handleDeleteDevice}
-        />
+        <div className="opacity-100 transition-opacity duration-500">
+          {loaded ? (
+            <DevicesGrid
+              data={data}
+              deviceType={devicesOptions()}
+              onEditDevice={handleEditDevice}
+              onDeleteDevice={handleDeleteDevice}
+            />
+          ) : (
+            <div className="mt-6">
+              <PreloaderGrid />
+            </div>
+          )}
+        </div>
       )}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <DevicesList
-            data={data}
-            deviceType={devicesOptions()}
-            onEditDevice={handleEditDevice}
-            onDeleteDevice={handleDeleteDevice}
-          />
+          {loaded ? (
+            <DevicesList
+              data={data}
+              deviceType={devicesOptions()}
+              onEditDevice={handleEditDevice}
+              onDeleteDevice={handleDeleteDevice}
+            />
+          ) : (
+            <div className="mt-6">
+              <PreloaderList />
+            </div>
+          )}
         </div>
       )}
     </>
