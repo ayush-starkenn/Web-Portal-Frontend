@@ -21,12 +21,12 @@ const Footer = () => {
   };
   return (
     <div className="flex w-full flex-col items-center justify-between px-1 pb-8 pt-3 lg:px-8 xl:flex-row">
-      <h5 className="mb-4 text-center text-sm font-medium text-gray-600 sm:!mb-0 md:text-sm">
-        <div className="mb-4 text-center text-sm text-gray-600 sm:!mb-0 md:text-base">
-          ©{1900 + new Date().getYear()} &nbsp;
+      <h5 className="mb-4 text-center font-medium text-gray-600 sm:!mb-0 md:text-sm">
+        <div className="mb-4 text-center text-gray-700 sm:!mb-0 md:text-base">
+          <span className="text-sm">©{1900 + new Date().getYear()} &nbsp;</span>
           <a
             href="https://starkenn.com/"
-            className="hover:underline"
+            className="text-sm hover:underline"
             target="blank"
           >
             Starkenn Technologies
@@ -35,7 +35,7 @@ const Footer = () => {
           <div className="heartbeat text-sm">
             <span>❤️</span>
           </div>
-          &nbsp;All Rights Reserved.
+          <span className="text-xs">&nbsp;All Rights Reserved.</span>
         </div>
       </h5>
       <div>
@@ -52,7 +52,7 @@ const Footer = () => {
           <li>
             <button
               onClick={openTermsDialog}
-              className="text-sm font-medium text-gray-600 hover:text-gray-600"
+              className="text-sm font-medium text-gray-700 hover:text-gray-600"
             >
               Terms & Conditions
             </button>
@@ -60,7 +60,7 @@ const Footer = () => {
           <li>
             <button
               onClick={openPrivacyPolicyDialog}
-              className="text-sm font-medium text-gray-600 hover:text-gray-600"
+              className="text-sm font-medium text-gray-700 hover:text-gray-600"
             >
               Privacy Policy
             </button>

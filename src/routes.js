@@ -31,7 +31,7 @@ import { RiAlertLine } from "react-icons/ri";
 import { TbReport, TbDeviceAnalytics } from "react-icons/tb";
 // import { BiRfid } from "react-icons/bi";
 import { HiOutlineUsers } from "react-icons/hi";
-import AdminProtected from "authorization/AdminProteted";
+// import AdminProtected from "authorization/AdminProteted";
 import CustomerProtected from "authorization/CustomerProtected";
 // import { DiDatabase } from "react-icons/di";
 // import Drivers from "views/customer/drivers";
@@ -39,7 +39,23 @@ import OngoingTrip from "views/customer/vehicles/components/OngoingTrip";
 import CompletedTrip from "views/customer/vehicles/components/CompletedTrip";
 import Organization from "views/admin/organization";
 import SimCards from "views/admin/sim_cards";
-
+import Cookies from "js-cookie";
+const user_type = Cookies.get("user_type");
+const simCardsRoute =
+  user_type === "3df557db-9e3c-11ee-9fc8-0a33c87d103e"
+    ? {
+        name: "Sim Cards",
+        title: "Sim Cards",
+        layout: "/admin",
+        path: "sim-cards",
+        icon: <MdOutlineSimCard className="h-6 w-6" />,
+        component: (
+          // <AdminProtected>
+          <SimCards />
+          // </AdminProtected>
+        ),
+      }
+    : null;
 //routes for Admin panel
 export const routes_admin = [
   {
@@ -86,6 +102,7 @@ export const routes_admin = [
       // </AdminProtected>
     ),
   },
+  ...(simCardsRoute ? { ...simCardsRoute } : {}),
   {
     name: "Devices",
     title: "Devices",
