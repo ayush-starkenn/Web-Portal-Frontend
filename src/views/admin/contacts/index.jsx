@@ -46,16 +46,17 @@ const Contacts = () => {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_API_URL}/contacts/getContacts-all/${user_uuid}`,
+        `https://hm2p40ejwa.execute-api.ap-south-1.amazonaws.com/dev/getContact`,
         {
-          headers: { authorization: `bearer ${token}` },
+          headers: { authorization: `${token}` },
         }
       )
       .then((res) => {
-        const formatedData = res.data.contacts.map((item, ind) => ({
+        console.log(res.data.data);
+        const formatedData = res.data.data.map((item, ind) => ({
           ...item,
           serialNo: ind + 1,
-          full_name: item.contact_first_name + " " + item.contact_last_name,
+          full_name: item.contact_name
         }));
         setContactsData(formatedData);
       })
@@ -222,7 +223,7 @@ const Contacts = () => {
     <>
       <Toast ref={toastRef} position="top-right" />
       <div className="flex-col justify-between">
-        <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
+        <h4 className="text-dark pt-3 text-xl font-bold dark:text-white">
           Contacts
         </h4>
         <div>

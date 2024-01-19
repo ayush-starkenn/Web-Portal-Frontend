@@ -230,40 +230,40 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             field="serialNo"
             header="Sr. No."
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "4rem" }}
           ></Column>
           <Column
             field="full_name"
             header="Name"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
-            field="contact_email"
-            header="Email"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            field="contact_info"
+            header="Contact_info"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
-            field="contact_mobile"
-            header="Mobile Number"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            field="contact_type"
+            header="Contact_type"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
             field="contact_status"
             header="Status"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "6rem" }}
             body={renderStatusCell}
           ></Column>
           <Column
             body={actionBodyTemplate}
             header="Action"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "6rem" }}
           ></Column>
         </DataTable>
@@ -275,7 +275,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           breakpoints={{ "960px": "75vw", "641px": "90vw" }}
           header="Edit the details"
           modal
-          className="p-fluid dark:bg-gray-900"
+          className="p-fluid dark:bg-gray-900 text-sm"
         >
           <form onSubmit={handleSubmit}>
             <div className="mx-auto mt-8">
@@ -291,7 +291,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                 />
                 <label
                   htmlFor="contact_first_name"
-                  className="dark:text-gray-300"
+                  className="dark:text-gray-300  text-sm"
                 >
                   First Name
                 </label>
@@ -310,7 +310,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                 />
                 <label
                   htmlFor="contact_last_name"
-                  className="dark:text-gray-300"
+                  className="dark:text-gray-300 text-sm"
                 >
                   Last Name
                 </label>
@@ -328,7 +328,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                     "contact_email"
                   )}`}
                 />
-                <label htmlFor="contact_email" className="dark:text-gray-300">
+                <label htmlFor="contact_email" className="dark:text-gray-300 text-sm">
                   Email
                 </label>
               </span>
@@ -345,7 +345,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                     "contact_mobile"
                   )}`}
                 />
-                <label htmlFor="contact_mobile" className="dark:text-gray-300">
+                <label htmlFor="contact_mobile" className="dark:text-gray-300 text-sm">
                   Mobile Number
                 </label>
               </span>
@@ -372,7 +372,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             <div className="p-field p-col-12 mt-7 flex justify-center">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600 text-sm"
               >
                 Edit Contact
               </button>
@@ -389,13 +389,13 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
               <Button
                 label="Delete"
                 icon="pi pi-check"
-                className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white"
+                className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white text-sm"
                 onClick={handleDelete}
               />
               <Button
                 label="Cancel"
                 icon="pi pi-times"
-                className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850"
+                className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850 text-sm"
                 onClick={closeDeleteDialog}
               />
             </div>
