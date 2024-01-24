@@ -7,6 +7,10 @@ import ContactsList from "./components/ContactsList";
 import { Toast } from "primereact/toast";
 import { FiPlus } from "react-icons/fi";
 
+import { RadioButton } from 'primereact/radiobutton';
+import { Button } from "primereact/button";
+        
+
 const Contacts = () => {
   const token = Cookies.get("token");
   const user_uuid = Cookies.get("user_uuid");
@@ -16,6 +20,8 @@ const Contacts = () => {
   const [formErrors, setFormErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
   const toastRef = useRef(null);
+  const [contactType , setContactType] = useState("phone");
+  const [primaryType, setPrimaryType] = useState("yes");
   const isValidPhoneNumber = (phoneNumber) => {
     // Regular expression to check for exactly 10 digits
     const phonePattern = /^\d{10}$/;
@@ -25,20 +31,14 @@ const Contacts = () => {
   const validateForm = () => {
     let errors = {};
 
-    if (!addData.contact_first_name) {
-      errors.contact_first_name = "First name is required";
-    }
-    if (!addData.contact_last_name) {
-      errors.contact_last_name = "Last name is required";
+    if (!addData.contact_name) {
+      errors.contact_name = "Name is required";
     }
 
-    if (!addData.contact_email) {
-      errors.contact_email = "Email is required";
+    if (!addData.contact_info) {
+      errors.contact_info = "Field is required";
     }
 
-    if (!addData.contact_mobile) {
-      errors.contact_mobile = "Mobile number is required";
-    }
 
     return errors;
   };
@@ -46,9 +46,9 @@ const Contacts = () => {
   useEffect(() => {
     axios
       .get(
-        `https://hm2p40ejwa.execute-api.ap-south-1.amazonaws.com/dev/getContact`,
+        `${process.env.REACT_APP_AWS_URL}/getContact`,
         {
-          headers: { authorization: `${token}` },
+          headers: { Authorization: `${token}` },
         }
       )
       .then((res) => {
@@ -92,22 +92,31 @@ const Contacts = () => {
 
     const errors = validateForm();
     setFormErrors(errors);
-    if (!isValidPhoneNumber(addData.contact_mobile)) {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Invalid Phone Number",
-        detail: "Please enter a 10-digit valid phone number.",
-        life: 3000,
-      });
-      return;
+    if(addData.contact_type == 'phone'){
+      if (!isValidPhoneNumber(addData.contact_info)) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Invalid Phone Number",
+          detail: "Please enter a 10-digit valid phone number.",
+          life: 3000,
+        });
+        return;
+      }
     }
+
+    
+    
+
+
+
     if (Object.keys(errors).length === 0) {
+      
       axios
         .post(
-          `${process.env.REACT_APP_API_URL}/contacts/savecontact/${user_uuid}`,
+          `${process.env.REACT_APP_AWS_URL}/addContact`,
           addData,
           {
-            headers: { authorization: `bearer ${token}` },
+            headers: { Authorization: `${token}` },
           }
         )
         .then((res) => {
@@ -116,7 +125,7 @@ const Contacts = () => {
             severity: "success",
             summary: "Success",
             detail: `Contact ${
-              addData.contact_first_name + " " + addData.contact_last_name
+              addData.conatct_name
             } added successfully!`,
             life: 3000,
           });
@@ -135,7 +144,7 @@ const Contacts = () => {
             toastRef.current.show({
               severity: "error",
               summary: "Error",
-              detail: "Failed to edit contact. Please try again.",
+              detail: "Failed to add contact. Please try again.",
               life: 3000,
             });
           }
@@ -154,11 +163,11 @@ const Contacts = () => {
   const editContacts = (contact_uuid, editData) => {
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/contacts/editcontact/${contact_uuid}`,
-        editData,
+        `${process.env.REACT_APP_AWS_URL}/editContact/${contact_uuid}`,
+        {"contact_name":editData.contact_name,"contact_primary":editData.contact_primary,"contact_type":editData.contact_type,"contact_info":editData.contact_info},
 
         {
-          headers: { authorization: `bearer ${token}` },
+          headers: { Authorization: `${token}` },
         }
       )
       .then((res) => {
@@ -167,7 +176,7 @@ const Contacts = () => {
           severity: "success",
           summary: "Success",
           detail: `Contact ${
-            editData.contact_first_name + " " + editData.contact_last_name
+            editData.contact_name
           } updated successfully!`,
           life: 3000,
         });
@@ -191,25 +200,27 @@ const Contacts = () => {
       });
   };
 
-  const deleteContact = (contact_uuid, contact_first_name) => {
+  const deleteContact = (contact_uuid, contact_name) => {
+    console.log(contact_uuid);
     axios
       .put(
-        `${process.env.REACT_APP_API_URL}/contacts/deletecontact/${contact_uuid}`,
-        { user_uuid },
+        `${process.env.REACT_APP_AWS_URL}/deleteContact/${contact_uuid}`,{},
         {
-          headers: { authorization: `bearer ${token}` },
+          headers: { Authorization:`${token}` },
         }
       )
       .then((res) => {
+        console.log("response:::",res);
         setRefresh(!refresh);
         toastRef.current.show({
           severity: "success",
           summary: "Success",
-          detail: `Contact ${contact_first_name} deleted successfully!`,
+          detail: `Contact ${contact_name} deleted successfully!`,
           life: 3000,
         });
       })
       .catch((err) => {
+        console.log("errr:::",err);
         toastRef.current.show({
           severity: "error",
           summary: "Error",
@@ -249,96 +260,107 @@ const Contacts = () => {
             <div className="mx-auto mt-8 ">
               <span className={`p-float-label `}>
                 <InputText
-                  id="contact_first_name"
-                  name="contact_first_name"
+                  id="contact_name"
+                  name="contact_name"
                   onChange={handleChange}
                   className={`border py-2 pl-2 ${
-                    formErrors.contact_first_name ? "border-red-600" : ""
+                    formErrors.contact_name ? "border-red-600" : ""
                   }`}
                 />
                 <label
-                  htmlFor="contact_first_name"
+                  htmlFor="contact_name"
                   className="dark:text-gray-300"
                 >
-                  First Name
+                  Full Name
                 </label>
               </span>
-              {formErrors.contact_first_name && (
+              {formErrors.contact_name && (
                 <small className="text-red-600">
-                  {formErrors.contact_first_name}
+                  {formErrors.contact_name}
                 </small>
               )}
             </div>
-            <div className="mx-auto mt-7 ">
-              <span className={`p-float-label `}>
-                <InputText
-                  id="contact_last_name"
-                  name="contact_last_name"
-                  onChange={handleChange}
-                  className={`border py-2 pl-2 ${
-                    formErrors.contact_last_name ? "border-red-600" : ""
-                  }`}
-                />
-                <label
-                  htmlFor="contact_last_name"
-                  className="dark:text-gray-300"
-                >
-                  Last Name
+            
+            {/*creating radio button here*/}
+              <div className="flex flex-wrap gap-3 mx-auto mt-7">
+              <label htmlFor="contact_type" className="dark:text-gray-300 mx-2">
+                  Contact Type :
                 </label>
-              </span>
-              {formErrors.contact_last_name && (
-                <small className="text-red-600">
-                  {formErrors.contact_last_name}
-                </small>
-              )}
-            </div>
-            <div className="mx-auto mt-7 ">
+              <div className="flex align-items-center" id="contact_type">
+                  <RadioButton onChange={handleChange} inputId="phone" name="contact_type" value="phone"  checked={addData.contact_type === 'phone'} />
+                  <label htmlFor="phone" className="ml-2">Phone</label>
+              </div>
+              <div className="flex align-items-center" id="contact_type">
+                  <RadioButton onChange={handleChange} inputId="email" name="contact_type" value="email" checked={addData.contact_type === 'email'} />
+                  <label htmlFor="email" className="ml-2">Email</label>
+              </div>
+              
+          </div>
+            {/* End of radio button */}
+            {console.log('add data : ' , addData.contact_type)}
+            {addData.contact_type === "email" ? (<div className="mx-auto mt-7 ">
               <span className={`p-float-label`}>
                 <InputText
                   id="contact_email"
-                  name="contact_email"
+                  name="contact_info"
                   type="email"
                   onChange={handleChange}
                   className={`border py-2 pl-2 ${
-                    formErrors.contact_email ? "border-red-600" : ""
+                    formErrors.contact_info ? "border-red-600" : ""
                   }`}
                 />
-                <label htmlFor="contact_email" className="dark:text-gray-300">
+                <label htmlFor="contact_info" className="dark:text-gray-300">
                   Email
                 </label>
               </span>
-              {formErrors.contact_email && (
+              {formErrors.contact_info && (
                 <small className="text-red-600">
-                  {formErrors.contact_email}
+                  {formErrors.contact_info}
                 </small>
               )}
-            </div>
-            <div className="mx-auto mt-7 ">
+            </div>):(<div className="mx-auto mt-7 ">
               <span className={`p-float-label `}>
                 <InputText
                   id="contact_mobile"
-                  name="contact_mobile"
+                  name="contact_info"
                   keyfilter="pint"
                   onChange={handleChange}
                   className={`border py-2 pl-2 ${
-                    formErrors.contact_mobile ? "border-red-600" : ""
+                    formErrors.contact_info ? "border-red-600" : ""
                   }`}
                 />
-                <label htmlFor="contact_mobile" className="dark:text-gray-300">
+                <label htmlFor="contact_info" className="dark:text-gray-300">
                   Mobile Number
                 </label>
               </span>
 
-              {formErrors.contact_mobile && (
+              {formErrors.contact_info && (
                 <small className="text-red-600">
-                  {formErrors.contact_mobile}
+                  {formErrors.contact_info}
                 </small>
               )}
-            </div>
-            <div className="p-field p-col-12 my-2 flex justify-center">
+            </div>)}
+            {/* primary contact or not */}
+            <div className="flex flex-wrap gap-3 mx-auto mt-7">
+              <label htmlFor="contact_primary" className="dark:text-gray-300 mx-2">
+                  Primary Contact :
+                </label>
+              <div className="flex align-items-center">
+                  <RadioButton onChange={handleChange} inputId="yes" name="contact_primary" value="1" checked={addData.contact_primary === 'yes'} />
+                  <label htmlFor="yes" className="ml-2">YES</label>
+              </div>
+              <div className="flex align-items-center">
+                  <RadioButton onChange={handleChange} inputId="no" name="contact_primary" value="2" checked={addData.contact_primary === 'no'} />
+                  <label htmlFor="no" className="ml-2">NO</label>
+              </div>
+              
+          </div>
+            {/* Primary contact ended */}
+            
+            <div className="mt-6 flex justify-center">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600 text-sm"
               >
                 Add Contact
               </button>

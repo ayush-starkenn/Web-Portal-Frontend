@@ -5,9 +5,11 @@ import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
+import { RadioButton } from "primereact/radiobutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import React, { useRef, useState } from "react";
+import axios from 'axios';
 
 const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   const [isDialog, setIsDialog] = useState(false);
@@ -47,11 +49,12 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   };
 
   const openDialog = (rowData) => {
+    console.log('raw data : ' , rowData)
     setIsDialog(true);
-    setEditId(rowData.contact_uuid);
+    setEditId(rowData.contact_id);
     setEditData({
       ...rowData,
-      contact_status: rowData.contact_status.toString(),
+      contact_active: rowData.contact_active.toString(),
     });
   };
 
@@ -68,8 +71,8 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
 
   const openDeleteDialog = (rowData) => {
     setDeleteDialog(true);
-    setDeleteId(rowData.contact_uuid);
-    setDeleteName(rowData.contact_first_name + " " + rowData.contact_last_name);
+    setDeleteId(rowData.contact_id);
+    setDeleteName(rowData.contact_name);
   };
   const closeDeleteDialog = () => {
     setDeleteDialog(false);
@@ -106,17 +109,23 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
         life: 3000,
       });
     }
-    if (!isValidPhoneNumber(editData.contact_mobile)) {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Invalid Phone Number",
-        detail: "Please enter a 10-digit valid phone number.",
-        life: 3000,
-      });
+    if(editData.contact_type=="phone"){
+      if (!isValidPhoneNumber(editData.contact_info)) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Invalid Phone Number",
+          detail: "Please enter a 10-digit valid phone number.",
+          life: 3000,
+        });
+    }
       return;
     }
     if (isValid) {
-      editContacts(editId, editData);
+
+
+
+      editContacts(editId,     {"contact_name":editData.contact_name,"contact_primary":editData.contact_primary,"contact_type":editData.contact_type,"contact_info":editData.contact_info},
+      );
       closeDialog();
     }
   };
@@ -170,10 +179,10 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
 
   //
   const renderStatusCell = (rowData) => {
-    const tagValue = rowData?.contact_status === 1 ? "Active" : "Deactive";
-    const tagSeverity = rowData?.contact_status === 1 ? "success" : "danger";
+    const tagValue = rowData?.contact_active === 1 ? "Active" : "Deactive";
+    const tagSeverity = rowData?.contact_active === 1 ? "success" : "danger";
 
-    return <Tag value={tagValue} severity={tagSeverity} />;
+    return <Tag value={tagValue} severity={tagSeverity} className="h-5 rounded-sm text-xs font-normal" />;
   };
   //
   const actionBodyTemplate = (rowData) => {
@@ -184,7 +193,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           rounded
           tooltip="Edit"
           tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
+          className="mr-2 border border-gray-700 text-gray-700"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => openDialog(rowData)}
         />
@@ -256,14 +265,14 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             field="contact_status"
             header="Status"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "6rem" }}
             body={renderStatusCell}
           ></Column>
           <Column
             body={actionBodyTemplate}
             header="Action"
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "6rem" }}
           ></Column>
         </DataTable>
@@ -279,51 +288,53 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
         >
           <form onSubmit={handleSubmit}>
             <div className="mx-auto mt-8">
+              {console.log(editData)}
               <span className={`p-float-label `}>
                 <InputText
-                  id="contact_first_name"
-                  name="contact_first_name"
+                  id="contact_name"
+                  name="contact_name"
                   onChange={handleChange}
-                  value={editData?.contact_first_name}
+                  value={editData?.contact_name}
                   className={`border py-2 pl-2 ${getClassName(
                     "contact_first_name"
                   )}`}
                 />
                 <label
-                  htmlFor="contact_first_name"
+                  htmlFor="contact_name"
                   className="dark:text-gray-300  text-sm"
                 >
-                  First Name
+                  Full Name
                 </label>
               </span>
             </div>
-            <div className="mx-auto mt-7">
-              <span className={`p-float-label `}>
-                <InputText
-                  id="contact_last_name"
-                  name="contact_last_name"
-                  onChange={handleChange}
-                  value={editData?.contact_last_name}
-                  className={`border py-2 pl-2 ${getClassName(
-                    "contact_last_name"
-                  )}`}
-                />
-                <label
-                  htmlFor="contact_last_name"
+            <div className="flex flex-wrap gap-3 mx-auto mt-7">
+            <label
+                  htmlFor="contact_type"
                   className="dark:text-gray-300 text-sm"
                 >
-                  Last Name
+                  Contact Type : 
                 </label>
-              </span>
+                <div className="flex align-items-center" id="contact_type">
+                  <RadioButton checked disabled onChange={handleChange} inputId="phone" name="contact_type" value='phone' />
+                  <label htmlFor="phone" className="ml-2">Phone</label>
+              </div>
+              <div className="flex align-items-center" id="contact_type">
+                  <RadioButton disabled onChange={handleChange} inputId="email" name="contact_type" value='email' checked={editData.contact_type === 'email'} />
+                  <label htmlFor="email" className="ml-2">Email</label>
+              </div>
+                
             </div>
-            <div className="mx-auto mt-7">
+            {
+              editData.contact_type=="email" ? 
+              (<div className="mx-auto mt-7">
               <span className={`p-float-label`}>
                 <InputText
+                  disabled
                   id="contact_email"
-                  name="contact_email"
+                  name="contact_info"
                   type="email"
                   onChange={handleChange}
-                  value={editData?.contact_email}
+                  value={editData?.contact_info}
                   className={`border py-2 pl-2 ${getClassName(
                     "contact_email"
                   )}`}
@@ -332,36 +343,39 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                   Email
                 </label>
               </span>
-            </div>
-            <div className="mx-auto mt-7">
-              <span className={`p-float-label `}>
-                <InputText
-                  id="contact_mobile"
-                  name="contact_mobile"
-                  keyfilter="pint"
-                  onChange={handleChange}
-                  value={editData?.contact_mobile}
-                  className={`border py-2 pl-2 ${getClassName(
-                    "contact_mobile"
-                  )}`}
-                />
-                <label htmlFor="contact_mobile" className="dark:text-gray-300 text-sm">
-                  Mobile Number
-                </label>
-              </span>
-            </div>
+            </div>) : 
+            (<div className="mx-auto mt-7">
+            <span className={`p-float-label `}>
+              <InputText
+                disabled
+                id="contact_mobile"
+                name="contact_info"
+                keyfilter="pint"
+                onChange={handleChange}
+                value={editData?.contact_info}
+                className={`border py-2 pl-2 ${getClassName(
+                  "contact_mobile"
+                )}`}
+              />
+              <label htmlFor="contact_mobile" className="dark:text-gray-300 text-sm">
+                Mobile Number
+              </label>
+            </span>
+          </div>)
+            }
+            
             <div className="mx-auto mt-7">
               <span className="p-float-label">
                 <Dropdown
                   id="status"
-                  name="contact_status"
+                  name="contact_active"
                   options={stateOptions}
                   optionLabel="label"
                   optionValue="value"
                   onChange={(e) => {
-                    handleChange(e, "contact_status");
+                    handleChange(e, "contact_active");
                   }}
-                  value={editData?.contact_status}
+                  value={editData?.contact_active}
                   className="border"
                 />
                 <label htmlFor="status" className="dark:text-gray-300">
