@@ -145,7 +145,7 @@ export const routes_admin = [
     title: "Contacts",
     layout: "/admin",
     path: "contacts",
-    icon: <MdContactPhone className="h-7 w-7" />,
+    icon: <MdContactPhone className="h-6 w-6" />,
     component: (
         <Contacts />
     ),

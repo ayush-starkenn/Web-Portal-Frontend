@@ -5,9 +5,11 @@ import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
+import { RadioButton } from "primereact/radiobutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import React, { useRef, useState } from "react";
+import axios from 'axios';
 
 const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   const [isDialog, setIsDialog] = useState(false);
@@ -47,11 +49,12 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   };
 
   const openDialog = (rowData) => {
+    console.log('raw data : ' , rowData)
     setIsDialog(true);
-    setEditId(rowData.contact_uuid);
+    setEditId(rowData.contact_id);
     setEditData({
       ...rowData,
-      contact_status: rowData.contact_status.toString(),
+      contact_active: rowData.contact_active.toString(),
     });
   };
 
@@ -68,8 +71,8 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
 
   const openDeleteDialog = (rowData) => {
     setDeleteDialog(true);
-    setDeleteId(rowData.contact_uuid);
-    setDeleteName(rowData.contact_first_name + " " + rowData.contact_last_name);
+    setDeleteId(rowData.contact_id);
+    setDeleteName(rowData.contact_name);
   };
   const closeDeleteDialog = () => {
     setDeleteDialog(false);
@@ -106,17 +109,23 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
         life: 3000,
       });
     }
-    if (!isValidPhoneNumber(editData.contact_mobile)) {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Invalid Phone Number",
-        detail: "Please enter a 10-digit valid phone number.",
-        life: 3000,
-      });
+    if(editData.contact_type=="phone"){
+      if (!isValidPhoneNumber(editData.contact_info)) {
+        toastRef.current.show({
+          severity: "warn",
+          summary: "Invalid Phone Number",
+          detail: "Please enter a 10-digit valid phone number.",
+          life: 3000,
+        });
+    }
       return;
     }
     if (isValid) {
-      editContacts(editId, editData);
+
+
+
+      editContacts(editId,     {"contact_name":editData.contact_name,"contact_primary":editData.contact_primary,"contact_type":editData.contact_type,"contact_info":editData.contact_info},
+      );
       closeDialog();
     }
   };
@@ -170,10 +179,10 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
 
   //
   const renderStatusCell = (rowData) => {
-    const tagValue = rowData?.contact_status === 1 ? "Active" : "Deactive";
-    const tagSeverity = rowData?.contact_status === 1 ? "success" : "danger";
+    const tagValue = rowData?.contact_active === 1 ? "Active" : "Deactive";
+    const tagSeverity = rowData?.contact_active === 1 ? "success" : "danger";
 
-    return <Tag value={tagValue} severity={tagSeverity} />;
+    return <Tag value={tagValue} severity={tagSeverity} className="h-5 rounded-sm text-xs font-normal" />;
   };
   //
   const actionBodyTemplate = (rowData) => {
@@ -184,7 +193,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           rounded
           tooltip="Edit"
           tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
+          className="mr-2 border border-gray-700 text-gray-700"
           style={{ width: "2rem", height: "2rem" }}
           onClick={() => openDialog(rowData)}
         />
@@ -230,40 +239,40 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             field="serialNo"
             header="Sr. No."
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "4rem" }}
           ></Column>
           <Column
             field="full_name"
             header="Name"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
-            field="contact_email"
-            header="Email"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            field="contact_info"
+            header="Contact_info"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
-            field="contact_mobile"
-            header="Mobile Number"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            field="contact_type"
+            header="Contact_type"
+            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
             field="contact_status"
             header="Status"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "6rem" }}
             body={renderStatusCell}
           ></Column>
           <Column
             body={actionBodyTemplate}
             header="Action"
-            className="border-b dark:bg-navy-800 dark:text-gray-200"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "6rem" }}
           ></Column>
         </DataTable>
@@ -275,93 +284,98 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           breakpoints={{ "960px": "75vw", "641px": "90vw" }}
           header="Edit the details"
           modal
-          className="p-fluid dark:bg-gray-900"
+          className="p-fluid dark:bg-gray-900 text-sm"
         >
           <form onSubmit={handleSubmit}>
             <div className="mx-auto mt-8">
+              {console.log(editData)}
               <span className={`p-float-label `}>
                 <InputText
-                  id="contact_first_name"
-                  name="contact_first_name"
+                  id="contact_name"
+                  name="contact_name"
                   onChange={handleChange}
-                  value={editData?.contact_first_name}
+                  value={editData?.contact_name}
                   className={`border py-2 pl-2 ${getClassName(
                     "contact_first_name"
                   )}`}
                 />
                 <label
-                  htmlFor="contact_first_name"
-                  className="dark:text-gray-300"
+                  htmlFor="contact_name"
+                  className="dark:text-gray-300  text-sm"
                 >
-                  First Name
+                  Full Name
                 </label>
               </span>
             </div>
-            <div className="mx-auto mt-7">
-              <span className={`p-float-label `}>
-                <InputText
-                  id="contact_last_name"
-                  name="contact_last_name"
-                  onChange={handleChange}
-                  value={editData?.contact_last_name}
-                  className={`border py-2 pl-2 ${getClassName(
-                    "contact_last_name"
-                  )}`}
-                />
-                <label
-                  htmlFor="contact_last_name"
-                  className="dark:text-gray-300"
+            <div className="flex flex-wrap gap-3 mx-auto mt-7">
+            <label
+                  htmlFor="contact_type"
+                  className="dark:text-gray-300 text-sm"
                 >
-                  Last Name
+                  Contact Type : 
                 </label>
-              </span>
+                <div className="flex align-items-center" id="contact_type">
+                  <RadioButton checked disabled onChange={handleChange} inputId="phone" name="contact_type" value='phone' />
+                  <label htmlFor="phone" className="ml-2">Phone</label>
+              </div>
+              <div className="flex align-items-center" id="contact_type">
+                  <RadioButton disabled onChange={handleChange} inputId="email" name="contact_type" value='email' checked={editData.contact_type === 'email'} />
+                  <label htmlFor="email" className="ml-2">Email</label>
+              </div>
+                
             </div>
-            <div className="mx-auto mt-7">
+            {
+              editData.contact_type=="email" ? 
+              (<div className="mx-auto mt-7">
               <span className={`p-float-label`}>
                 <InputText
+                  disabled
                   id="contact_email"
-                  name="contact_email"
+                  name="contact_info"
                   type="email"
                   onChange={handleChange}
-                  value={editData?.contact_email}
+                  value={editData?.contact_info}
                   className={`border py-2 pl-2 ${getClassName(
                     "contact_email"
                   )}`}
                 />
-                <label htmlFor="contact_email" className="dark:text-gray-300">
+                <label htmlFor="contact_email" className="dark:text-gray-300 text-sm">
                   Email
                 </label>
               </span>
-            </div>
-            <div className="mx-auto mt-7">
-              <span className={`p-float-label `}>
-                <InputText
-                  id="contact_mobile"
-                  name="contact_mobile"
-                  keyfilter="pint"
-                  onChange={handleChange}
-                  value={editData?.contact_mobile}
-                  className={`border py-2 pl-2 ${getClassName(
-                    "contact_mobile"
-                  )}`}
-                />
-                <label htmlFor="contact_mobile" className="dark:text-gray-300">
-                  Mobile Number
-                </label>
-              </span>
-            </div>
+            </div>) : 
+            (<div className="mx-auto mt-7">
+            <span className={`p-float-label `}>
+              <InputText
+                disabled
+                id="contact_mobile"
+                name="contact_info"
+                keyfilter="pint"
+                onChange={handleChange}
+                value={editData?.contact_info}
+                className={`border py-2 pl-2 ${getClassName(
+                  "contact_mobile"
+                )}`}
+              />
+              <label htmlFor="contact_mobile" className="dark:text-gray-300 text-sm">
+                Mobile Number
+              </label>
+            </span>
+          </div>)
+            }
+            
             <div className="mx-auto mt-7">
               <span className="p-float-label">
                 <Dropdown
                   id="status"
-                  name="contact_status"
+                  name="contact_active"
                   options={stateOptions}
                   optionLabel="label"
                   optionValue="value"
                   onChange={(e) => {
-                    handleChange(e, "contact_status");
+                    handleChange(e, "contact_active");
                   }}
-                  value={editData?.contact_status}
+                  value={editData?.contact_active}
                   className="border"
                 />
                 <label htmlFor="status" className="dark:text-gray-300">
@@ -372,7 +386,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             <div className="p-field p-col-12 mt-7 flex justify-center">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600 text-sm"
               >
                 Edit Contact
               </button>
@@ -389,13 +403,13 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
               <Button
                 label="Delete"
                 icon="pi pi-check"
-                className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white"
+                className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white text-sm"
                 onClick={handleDelete}
               />
               <Button
                 label="Cancel"
                 icon="pi pi-times"
-                className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850"
+                className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850 text-sm"
                 onClick={closeDeleteDialog}
               />
             </div>
