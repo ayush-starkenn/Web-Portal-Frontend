@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Calendar } from "primereact/calendar";
-// import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
-// import { RadioButton } from "primereact/radiobutton";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { InputText } from "primereact/inputtext";

@@ -133,9 +133,9 @@ export default function DevicesGrid({
   const itemTemplate = (item) => {
     const tagSeverity = item?.device_status === 1 ? "success" : "danger";
     return (
-      <div className="mb-4 w-[28.8vw] rounded-lg bg-gray-50 transition duration-300 ease-in-out hover:shadow-lg dark:bg-gray-900 dark:text-gray-150 md-max:w-[88vw]">
+      <div className="mb-4 w-[28.8vw] rounded-lg bg-gray-50 transition duration-300 ease-in-out hover:shadow-lg dark:bg-gray-900 dark:text-gray-150 dark:hover:bg-navy-700 md-max:w-[88vw]">
         <div className="card">
-          <div className="card-header flex justify-between rounded-t-lg bg-[#ddd]">
+          <div className="card-header flex justify-between rounded-t-lg bg-[#ddd] dark:border-none dark:bg-navy-800 ">
             <div className="text-sm font-semibold">{item.device_id}</div>
           </div>
           <div className="card-body">
@@ -163,7 +163,7 @@ export default function DevicesGrid({
               </div>
             </div>
           </div>
-          <div className="flex justify-between rounded-b-lg border-t-2 py-2">
+          <div className="flex justify-between rounded-b-lg border-t-2 py-2 dark:border-gray-700">
             <div className="ml-4">
               <Tag
                 value={item.device_status === 1 ? "Active" : "Deactive"}
@@ -314,7 +314,6 @@ export default function DevicesGrid({
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
           </span>
-
           <InputText
             value={globalFilterValue}
             onChange={onGlobalFilterChange}

@@ -67,9 +67,6 @@ input:checked.defaultCheckbox::before {
 .dark\:p-treetable-thead {
   background: #000 !important;
 }
-.sapna {
-  background-color: #000 !important;
-}
 
 .p-datatable .p-datatable-header {
   padding: 0px;
@@ -79,6 +76,9 @@ input:checked.defaultCheckbox::before {
 .p-toolbar {
   background: none;
   padding: 15px 0px 3px 0px;
+}
+.p-paginator-current {
+  font-size: 12px;
 }
 .p-datatable-wrapper {
   border-radius: 18px 18px 0px 0px;
