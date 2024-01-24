@@ -9,7 +9,10 @@ import { RadioButton } from "primereact/radiobutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import React, { useRef, useState } from "react";
-import axios from 'axios';
+import { FaPhoneAlt, FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import axios from "axios";
+import { MdDeleteOutline, MdEmail } from "react-icons/md";
 
 const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   const [isDialog, setIsDialog] = useState(false);
@@ -49,7 +52,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   };
 
   const openDialog = (rowData) => {
-    console.log('raw data : ' , rowData)
+    console.log("raw data : ", rowData);
     setIsDialog(true);
     setEditId(rowData.contact_id);
     setEditData({
@@ -109,7 +112,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
         life: 3000,
       });
     }
-    if(editData.contact_type=="phone"){
+    if (editData.contact_type == "phone") {
       if (!isValidPhoneNumber(editData.contact_info)) {
         toastRef.current.show({
           severity: "warn",
@@ -117,15 +120,16 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           detail: "Please enter a 10-digit valid phone number.",
           life: 3000,
         });
-    }
+      }
       return;
     }
     if (isValid) {
-
-
-
-      editContacts(editId,     {"contact_name":editData.contact_name,"contact_primary":editData.contact_primary,"contact_type":editData.contact_type,"contact_info":editData.contact_info},
-      );
+      editContacts(editId, {
+        contact_name: editData.contact_name,
+        contact_primary: editData.contact_primary,
+        contact_type: editData.contact_type,
+        contact_info: editData.contact_info,
+      });
       closeDialog();
     }
   };
@@ -153,24 +157,27 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
   //
   const renderHeader = () => {
     return (
-      <div className="my-4 flex justify-end">
-        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+      <div className="my-4 flex justify-end align-middle">
+        <div className="flex items-center">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-              placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
-            />
-            {globalFilterValue && (
+          </span>
+
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Keyword Search"
+            className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
+          />
+          {globalFilterValue && (
+            <div>
               <Button
                 icon="pi pi-times"
-                className="p-button-rounded p-button-text dark:text-gray-50 dark:hover:text-gray-50"
+                className="p-button-rounded p-button-text py-auto dark:text-gray-50 dark:hover:text-gray-50"
                 onClick={clearSearch}
               />
-            )}
-          </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -182,33 +189,36 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
     const tagValue = rowData?.contact_active === 1 ? "Active" : "Deactive";
     const tagSeverity = rowData?.contact_active === 1 ? "success" : "danger";
 
-    return <Tag value={tagValue} severity={tagSeverity} className="h-5 rounded-sm text-xs font-normal" />;
+    return (
+      <Tag
+        value={tagValue}
+        severity={tagSeverity}
+        className="h-5 rounded-sm text-xs font-normal"
+      />
+    );
   };
   //
   const actionBodyTemplate = (rowData) => {
     return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          tooltip="Edit"
-          tooltipOptions={{ position: "mouse" }}
-          className="mr-2 border border-gray-700 text-gray-700"
-          style={{ width: "2rem", height: "2rem" }}
+      <div className="flex text-lg">
+        <FaRegEdit
+          title="Edit"
           onClick={() => openDialog(rowData)}
+          className="mr-2 cursor-pointer text-gray-700"
         />
-        <Button
-          icon="pi pi-trash"
-          rounded
-          tooltip="Delete"
-          tooltipOptions={{ position: "mouse" }}
-          style={{ width: "2rem", height: "2rem" }}
-          className="border border-red-600 text-red-600"
+        <RiDeleteBin6Line
+          title="Delete"
           onClick={() => openDeleteDialog(rowData)}
+          className="mx-2 cursor-pointer text-red-600"
         />
-      </React.Fragment>
+      </div>
     );
   };
+
+  const optionsAdd = [
+    { label: "Phone", value: "Phone" },
+    { label: "Email", value: "Email" },
+  ];
 
   return (
     <>
@@ -239,28 +249,47 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             field="serialNo"
             header="Sr. No."
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "4rem" }}
           ></Column>
           <Column
             field="full_name"
             header="Name"
             sortable
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
             field="contact_info"
             header="Contact_info"
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "8rem" }}
           ></Column>
           <Column
             field="contact_type"
             header="Contact_type"
-            className="border-b dark:bg-navy-800 dark:text-gray-200 text-sm"
+            body={(rowData) => (
+              <Tag
+                className="my-1 mr-2 bg-gray-200 text-gray-800"
+                icon={
+                  rowData.contact_type === "Phone" ? (
+                    <FaPhoneAlt className="text-xs text-gray-500 mr-2" />
+                  ) : (
+                    <MdEmail className="text-xs text-gray-500  mr-2" />
+                  )
+                }
+                style={{
+                  width: "fit-content",
+                  height: "25px",
+                  lineHeight: "40px",
+                }}
+                value={rowData.contact_type}
+              />
+            )}
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
             style={{ minWidth: "8rem" }}
-          ></Column>
+          />
+          
           <Column
             field="contact_status"
             header="Status"
@@ -284,7 +313,7 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
           breakpoints={{ "960px": "75vw", "641px": "90vw" }}
           header="Edit the details"
           modal
-          className="p-fluid dark:bg-gray-900 text-sm"
+          className="p-fluid text-sm dark:bg-gray-900"
         >
           <form onSubmit={handleSubmit}>
             <div className="mx-auto mt-8">
@@ -301,69 +330,13 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                 />
                 <label
                   htmlFor="contact_name"
-                  className="dark:text-gray-300  text-sm"
+                  className="text-sm  dark:text-gray-300"
                 >
                   Full Name
                 </label>
               </span>
             </div>
-            <div className="flex flex-wrap gap-3 mx-auto mt-7">
-            <label
-                  htmlFor="contact_type"
-                  className="dark:text-gray-300 text-sm"
-                >
-                  Contact Type : 
-                </label>
-                <div className="flex align-items-center" id="contact_type">
-                  <RadioButton checked disabled onChange={handleChange} inputId="phone" name="contact_type" value='phone' />
-                  <label htmlFor="phone" className="ml-2">Phone</label>
-              </div>
-              <div className="flex align-items-center" id="contact_type">
-                  <RadioButton disabled onChange={handleChange} inputId="email" name="contact_type" value='email' checked={editData.contact_type === 'email'} />
-                  <label htmlFor="email" className="ml-2">Email</label>
-              </div>
-                
-            </div>
-            {
-              editData.contact_type=="email" ? 
-              (<div className="mx-auto mt-7">
-              <span className={`p-float-label`}>
-                <InputText
-                  disabled
-                  id="contact_email"
-                  name="contact_info"
-                  type="email"
-                  onChange={handleChange}
-                  value={editData?.contact_info}
-                  className={`border py-2 pl-2 ${getClassName(
-                    "contact_email"
-                  )}`}
-                />
-                <label htmlFor="contact_email" className="dark:text-gray-300 text-sm">
-                  Email
-                </label>
-              </span>
-            </div>) : 
-            (<div className="mx-auto mt-7">
-            <span className={`p-float-label `}>
-              <InputText
-                disabled
-                id="contact_mobile"
-                name="contact_info"
-                keyfilter="pint"
-                onChange={handleChange}
-                value={editData?.contact_info}
-                className={`border py-2 pl-2 ${getClassName(
-                  "contact_mobile"
-                )}`}
-              />
-              <label htmlFor="contact_mobile" className="dark:text-gray-300 text-sm">
-                Mobile Number
-              </label>
-            </span>
-          </div>)
-            }
-            
+
             <div className="mx-auto mt-7">
               <span className="p-float-label">
                 <Dropdown
@@ -383,10 +356,10 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
                 </label>
               </span>
             </div>
-            <div className="p-field p-col-12 mt-7 flex justify-center">
+            <div className="mt-6 flex justify-end">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600 text-sm"
+                className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
               >
                 Edit Contact
               </button>
@@ -402,20 +375,23 @@ const ContactsList = ({ contactsData, editContacts, deleteContact }) => {
             <div>
               <Button
                 label="Delete"
-                icon="pi pi-check"
-                className="mr-2 bg-red-500 px-3 py-2 text-white dark:hover:bg-red-500 dark:hover:text-white text-sm"
+                className="mr-2 bg-red-500 px-2 py-1 text-xs text-white dark:hover:bg-red-500 dark:hover:text-white"
                 onClick={handleDelete}
               />
               <Button
                 label="Cancel"
-                icon="pi pi-times"
-                className="bg-gray-600 px-3 py-2 text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850 text-sm"
+                className="bg-gray-700 px-2 py-1 text-xs text-white dark:text-gray-850 dark:hover:bg-gray-600 dark:hover:text-gray-850"
                 onClick={closeDeleteDialog}
               />
             </div>
           }
         >
-          <div>Are you sure you want to delete {deleteName}?</div>
+          <div className="flex items-center">
+            <MdDeleteOutline className="text-2xl text-blue-400" />
+            <span className="text-sm font-semibold">
+              Are you sure you want to delete {deleteName}?
+            </span>
+          </div>
         </Dialog>
       </div>
     </>

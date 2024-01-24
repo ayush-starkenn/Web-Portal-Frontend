@@ -9,6 +9,8 @@ import { FiPlus } from "react-icons/fi";
 
 import { RadioButton } from 'primereact/radiobutton';
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { Checkbox } from "primereact/checkbox";
         
 
 const Contacts = () => {
@@ -16,6 +18,7 @@ const Contacts = () => {
   const user_uuid = Cookies.get("user_uuid");
   const [isDialog, setIsDialog] = useState(false);
   const [addData, setAddData] = useState({});
+  const [primary, setPrimary] = useState('2');
   const [contactsData, setContactsData] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
@@ -43,6 +46,7 @@ const Contacts = () => {
     return errors;
   };
 
+ 
   useEffect(() => {
     axios
       .get(
@@ -110,7 +114,10 @@ const Contacts = () => {
 
 
     if (Object.keys(errors).length === 0) {
-      
+      if(addData.contact_primary!=='1'){
+        addData.contact_primary='2'
+      }
+
       axios
         .post(
           `${process.env.REACT_APP_AWS_URL}/addContact`,
@@ -229,6 +236,7 @@ const Contacts = () => {
         });
       });
   };
+  const optionsAdd = [{label : 'Phone', value:'Phone'} , {label : 'Email', value:'Email'}]
 
   return (
     <>
@@ -238,13 +246,13 @@ const Contacts = () => {
           Contacts
         </h4>
         <div>
-          <button
-            className="mt-2 flex h-10 items-center rounded-lg bg-blue-500 px-3 py-2 text-left font-semibold text-white hover:bg-blue-600"
-            onClick={openDialog}
-          >
-            <FiPlus className="mr-2" /> {/* Use the React Icons component */}
-            New Contact
-          </button>
+        <button
+        className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
+        onClick={openDialog}
+      >
+        <FiPlus />
+        &nbsp;New Contact
+      </button>
         </div>
         {/* dialog to add contact */}
         <Dialog
@@ -263,13 +271,13 @@ const Contacts = () => {
                   id="contact_name"
                   name="contact_name"
                   onChange={handleChange}
-                  className={`border py-2 pl-2 ${
+                  className={`border py-2 pl-2 text-sm${
                     formErrors.contact_name ? "border-red-600" : ""
                   }`}
                 />
                 <label
                   htmlFor="contact_name"
-                  className="dark:text-gray-300"
+                  className="dark:text-gray-300 text-sm"
                 >
                   Full Name
                 </label>
@@ -283,17 +291,21 @@ const Contacts = () => {
             
             {/*creating radio button here*/}
               <div className="flex flex-wrap gap-3 mx-auto mt-7">
-              <label htmlFor="contact_type" className="dark:text-gray-300 mx-2">
-                  Contact Type :
+              <span className="p-float-label w-[100%]">
+                <Dropdown
+                  id="contact_type"
+                  name="contact_type"
+                  options={optionsAdd}
+                  optionLabel="label"
+                  optionValue="value"
+                  className={`p-dropdown h-10 border text-sm w-[100%]`}
+                  onChange={handleChange}
+                  value={addData.contact_type}
+                />
+                <label htmlFor="device_type" className="dark:text-gray-300 text-sm">
+                  Contact Type
                 </label>
-              <div className="flex align-items-center" id="contact_type">
-                  <RadioButton onChange={handleChange} inputId="phone" name="contact_type" value="phone"  checked={addData.contact_type === 'phone'} />
-                  <label htmlFor="phone" className="ml-2">Phone</label>
-              </div>
-              <div className="flex align-items-center" id="contact_type">
-                  <RadioButton onChange={handleChange} inputId="email" name="contact_type" value="email" checked={addData.contact_type === 'email'} />
-                  <label htmlFor="email" className="ml-2">Email</label>
-              </div>
+              </span>
               
           </div>
             {/* End of radio button */}
@@ -305,11 +317,11 @@ const Contacts = () => {
                   name="contact_info"
                   type="email"
                   onChange={handleChange}
-                  className={`border py-2 pl-2 ${
+                  className={`border py-2 pl-2 text-sm${
                     formErrors.contact_info ? "border-red-600" : ""
                   }`}
                 />
-                <label htmlFor="contact_info" className="dark:text-gray-300">
+                <label htmlFor="contact_info" className="dark:text-gray-300 text-sm">
                   Email
                 </label>
               </span>
@@ -325,11 +337,11 @@ const Contacts = () => {
                   name="contact_info"
                   keyfilter="pint"
                   onChange={handleChange}
-                  className={`border py-2 pl-2 ${
+                  className={`border py-2 pl-2 text-sm ${
                     formErrors.contact_info ? "border-red-600" : ""
                   }`}
                 />
-                <label htmlFor="contact_info" className="dark:text-gray-300">
+                <label htmlFor="contact_info" className="dark:text-gray-300 text-sm">
                   Mobile Number
                 </label>
               </span>
@@ -342,25 +354,20 @@ const Contacts = () => {
             </div>)}
             {/* primary contact or not */}
             <div className="flex flex-wrap gap-3 mx-auto mt-7">
-              <label htmlFor="contact_primary" className="dark:text-gray-300 mx-2">
-                  Primary Contact :
+            <span className="w-[100%] ml-2 flex flex-wrap align-center">
+            <input type='checkbox' onChange={handleChange} name='contact_primary' id='contact_primary' value='1'></input>
+            <label htmlFor="contact_primary" className="dark:text-gray-300 ml-2 text-xs text-blue-600">
+                  Set this as primary contact
                 </label>
-              <div className="flex align-items-center">
-                  <RadioButton onChange={handleChange} inputId="yes" name="contact_primary" value="1" checked={addData.contact_primary === 'yes'} />
-                  <label htmlFor="yes" className="ml-2">YES</label>
-              </div>
-              <div className="flex align-items-center">
-                  <RadioButton onChange={handleChange} inputId="no" name="contact_primary" value="2" checked={addData.contact_primary === 'no'} />
-                  <label htmlFor="no" className="ml-2">NO</label>
-              </div>
+                </span>
               
           </div>
             {/* Primary contact ended */}
             
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-end">
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-600 text-sm"
+                className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
               >
                 Add Contact
               </button>
