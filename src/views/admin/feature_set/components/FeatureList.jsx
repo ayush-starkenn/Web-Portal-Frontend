@@ -14,17 +14,20 @@ import { AppContext } from "context/AppContext";
 import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import { FiPlus } from "react-icons/fi";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import PreloaderList from "components/skeleton-preloader/PreloaderList";
 
 const FeatureList = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [isDialogVisible1, setIsDialogVisible1] = useState(false);
-  const [listCustomers, setListCustomers] = useState([]);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [myData, setMyData] = useState();
   const [fs, setFs] = useState();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [data, setData] = useState([]);
+  const [loaded, setLoaded] = useState(true);
   const toastRef = useRef(null);
   const token = Cookies.get("token");
   const user_uuid = Cookies.get("user_uuid");
@@ -39,19 +42,20 @@ const FeatureList = () => {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_API_URL}/featuresets/get-all-featureset`,
+        `${process.env.REACT_APP_AWS_URL}/getFeatureset`,
 
         {
-          headers: { authorization: `bearer ${token}` },
+          headers: { Authorization: token },
         }
       )
       .then((res) => {
-        const formattedData = res.data.results.map((item, index) => ({
+        const formattedData = res.data.data.map((item, index) => ({
           ...item,
           serialNo: index + 1,
           key: index + 1,
         }));
         setData(formattedData);
+        setLoaded(false);
       })
       .catch((err) => console.log(err));
   }, [token, fs]);
@@ -68,57 +72,18 @@ const FeatureList = () => {
     setIsDeleteDialogVisible(false);
   };
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/customers/get-all-customer`, {
-        headers: { authorization: `bearer ${token}` },
-      })
-      .then((res) => {
-        setListCustomers(res.data.customerData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [token]);
-
-  const usersBodyTemplate = (rowData) => {
-    try {
-      let assignedusers = JSON.parse(rowData.featureset_users);
-
-      let currentUsers = assignedusers.map((el) => el.user_uuid);
-
-      let filterUsers = listCustomers?.filter(
-        (el) => currentUsers.includes(el.user_uuid) && el.user_type === 2
-      );
-
-      let mapUsers = filterUsers?.map((el, ind) => (
-        <Tag
-          key={ind}
-          className="my-1 mr-2 bg-gray-200 text-gray-800"
-          icon="pi pi-user"
-          value={el.first_name + " " + el.last_name}
-        ></Tag>
-      ));
-
-      return <div className="tag-container">{mapUsers}</div>;
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      return null;
-    }
-  };
-
   const statusBodyTemplate = (rowData) => {
     return rowData.featureset_status === 1 ? (
       <Tag
         value={"Active"}
         severity={"success"}
-        style={{ width: "75px" }}
+        className="h-5 rounded-sm text-xs font-normal"
       ></Tag>
     ) : (
       <Tag
         value={"Deactive"}
         severity={"danger"}
-        style={{ width: "75px" }}
+        className="h-5 rounded-sm text-xs font-normal"
       ></Tag>
     );
   };
@@ -239,59 +204,56 @@ const FeatureList = () => {
 
   //searchbox
   const header = (
-    <div className="align-items-center flex flex-wrap justify-end gap-2 py-3 dark:bg-gray-950">
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
+    <div className="my-4 flex justify-end align-middle">
+      <div className="flex items-center">
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+        </span>
         <InputText
           value={globalFilterValue}
           onChange={onGlobalFilterChange}
           placeholder="Keyword Search"
-          className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
+          className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
         />
         {globalFilterValue && (
-          <Button
-            icon="pi pi-times"
-            className="p-button-rounded p-button-text dark:text-gray-50 dark:hover:text-gray-50"
-            onClick={clearSearch}
-          />
+          <div>
+            <Button
+              icon="pi pi-times"
+              className="p-button-rounded p-button-text py-auto dark:text-gray-50 dark:hover:text-gray-50"
+              onClick={clearSearch}
+            />
+          </div>
         )}
-      </span>
+      </div>
     </div>
   );
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          tooltip="Edit"
-          tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
-          style={{ width: "2rem", height: "2rem" }}
+      <div className="flex text-lg">
+        <FaRegEdit
+          title="Edit"
           onClick={() => openDialog1(rowData)}
+          className="mr-2 cursor-pointer text-gray-700"
         />
-        <Button
-          icon="pi pi-trash"
-          rounded
-          tooltip="Delete"
-          tooltipOptions={{ position: "mouse" }}
-          style={{ width: "2rem", height: "2rem" }}
-          className="border border-red-600 text-red-600"
+        <RiDeleteBin6Line
+          title="Delete"
           onClick={() => openDeleteDialog(rowData)}
+          className="mx-2 cursor-pointer text-red-600"
         />
-      </React.Fragment>
+      </div>
     );
   };
+
   return (
     <>
       <div>
         <button
-          className="mt-2 flex h-10 items-center rounded-lg bg-blue-500 px-3 py-2 text-left font-semibold text-white hover:bg-blue-600"
+          className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
           onClick={openDialog}
         >
-          <FiPlus className="mr-2" />
-          New Feature Set
+          <FiPlus />
+          &nbsp;New Featureset
         </button>
       </div>
 
@@ -354,55 +316,59 @@ const FeatureList = () => {
         </div>
       </Dialog>
       {/* List View */}
-      <DataTable
-        removableSort
-        value={data}
-        dataKey="featureset_uuid"
-        paginator
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25]}
-        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-        filterDisplay="menu"
-        filters={filters}
-        globalFilterFields={["featureset_name", "featureset_users"]}
-        emptyMessage="No featureset found."
-        header={header}
-      >
-        <Column
-          field="serialNo"
-          header="Sr. No."
-          style={{ minWidth: "3rem" }}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-        />
-        <Column
-          field="featureset_name"
-          header="Featureset Name"
-          style={{ minWidth: "12rem" }}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-        />
-        <Column
-          field="featureset_users"
-          header="Featureset Users"
-          body={usersBodyTemplate}
-          style={{ minWidth: "16rem" }}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-        />
-        <Column
-          field="featureset_status"
-          header="Featureset Status"
-          body={statusBodyTemplate}
-          sortable
-          style={{ minWidth: "8rem" }}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-        />
-        <Column
-          body={actionBodyTemplate}
-          header="Action"
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "8rem" }}
-        />
-      </DataTable>
+      {loaded ? (
+        <PreloaderList />
+      ) : (
+        <DataTable
+          removableSort
+          value={data}
+          dataKey="featureset_uuid"
+          paginator
+          rows={5}
+          rowsPerPageOptions={[5, 10, 25]}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+          filterDisplay="menu"
+          filters={filters}
+          globalFilterFields={["featureset_name", "featureset_users"]}
+          emptyMessage="No featureset found."
+          header={header}
+        >
+          <Column
+            field="serialNo"
+            header="Sr. No."
+            style={{ minWidth: "3rem" }}
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          />
+          <Column
+            field="featureset_name"
+            header="Featureset Name"
+            style={{ minWidth: "12rem" }}
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          />
+          <Column
+            field="featureset_type"
+            header="Featureset Type"
+            // body={usersBodyTemplate}
+            style={{ minWidth: "16rem" }}
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          />
+          <Column
+            field="featureset_status"
+            header="Featureset Status"
+            body={statusBodyTemplate}
+            sortable
+            style={{ minWidth: "8rem" }}
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          />
+          <Column
+            body={actionBodyTemplate}
+            header="Action"
+            className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+            style={{ minWidth: "8rem" }}
+          />
+        </DataTable>
+      )}
     </>
   );
 };

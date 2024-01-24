@@ -10,8 +10,11 @@ import { Dropdown } from "primereact/dropdown";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Tag } from "primereact/tag";
+import { TiInputChecked } from "react-icons/ti";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
-export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
+export default function SimList({ data, onEditDevice, onDeleteDevice }) {
   const token = Cookies.get("token");
 
   const [filters, setFilters] = useState({
@@ -55,24 +58,27 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
   //Searchbox
   const renderHeader = () => {
     return (
-      <div className="my-4 flex justify-end">
-        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+      <div className="my-4 flex justify-end align-middle">
+        <div className="flex items-center">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-              placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
-            />
-            {globalFilterValue && (
+          </span>
+
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Keyword Search"
+            className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
+          />
+          {globalFilterValue && (
+            <div>
               <Button
                 icon="pi pi-times"
-                className="p-button-rounded p-button-text dark:text-gray-50 dark:hover:text-gray-50"
+                className="p-button-rounded p-button-text py-auto dark:text-gray-50 dark:hover:text-gray-50"
                 onClick={clearSearch}
               />
-            )}
-          </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -80,26 +86,18 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <>
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          tooltip="Edit"
-          tooltipOptions={{ position: "mouse" }}
-          className="mr-3 border border-gray-700 text-gray-700"
-          style={{ width: "2rem", height: "2rem" }}
+      <div className="flex text-lg">
+        <FaRegEdit
+          title="Edit"
           onClick={() => openDialog(rowData)}
+          className="mr-2 cursor-pointer text-gray-700"
         />
-        <Button
-          icon="pi pi-trash"
-          rounded
-          tooltip="Delete"
-          tooltipOptions={{ position: "mouse" }}
-          style={{ width: "2rem", height: "2rem" }}
-          className="border border-red-600 text-red-600"
+        <RiDeleteBin6Line
+          title="Delete"
           onClick={() => openDeleteDialog(rowData)}
+          className="mx-2 cursor-pointer text-red-600"
         />
-      </>
+      </div>
     );
   };
 
@@ -240,10 +238,6 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       });
   };
 
-  const renderCellWithNA = (data) => {
-    return data ? data : "--";
-  };
-
   // Status body
   const getStatusSeverity = (option) => {
     switch (option) {
@@ -263,10 +257,20 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
       <Tag
         value={rowData.sim_is_active === 1 ? "Active" : "Deactive"}
         severity={getStatusSeverity(rowData.sim_is_active)}
+        className="h-5 rounded-sm text-xs font-normal"
       />
     );
   };
 
+  const availabilityTemplate = (rowData) => {
+    return (
+      <TiInputChecked
+        className={`h-6 w-6 ${
+          rowData.linked === null ? "text-green-600" : "text-red-500"
+        }`}
+      />
+    );
+  };
   //edit dialog
   return (
     <div className="card">
@@ -403,66 +407,77 @@ export default function DevicesList({ data, onEditDevice, onDeleteDevice }) {
         <Column
           field="serialNo"
           header="Sr. No."
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "4rem", textAlign: "center" }}
         ></Column>
         <Column
           field="sim_number"
           header="Sim Number"
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>
 
         <Column
           header="Sim Tag"
           sortable
-          className="dark:te xt-gray-200 border-b  dark:bg-navy-800"
-          style={{ minWidth: "12rem" }}
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "6rem" }}
           body={(rowData) => (
             <Tag
               className="my-1 mr-2 bg-gray-200 text-gray-800"
-              // icon="pi pi-user"
+              icon="pi pi-tag"
               style={{
                 width: "fit-content",
                 height: "25px",
-                lineHeight: "40px",
               }}
               value={rowData.sim_tag}
             />
           )}
         ></Column>
-
         <Column
           field="sim_validity"
           header="Sim Validity"
           sortable
-          body={(rowData) => renderCellWithNA(rowData.sim_validity)}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          body={(rowData) => {
+            const simValidityDate = rowData.sim_validity
+              ? new Date(rowData.sim_validity)
+              : null;
+
+            return simValidityDate
+              ? simValidityDate.toLocaleDateString("en-GB")
+              : "--";
+          }}
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "14rem" }}
         ></Column>
         <Column
           field="sim_data_pack"
           header="Data Pack"
           sortable
-          body={(rowData) => renderCellWithNA(rowData.sim_number)}
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
-          style={{ minWidth: "14rem" }}
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "7rem" }}
         ></Column>
 
         <Column
-          field="device_status"
           header="Status"
           body={statusBodyTemplate}
           sortable
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
+          style={{ minWidth: "8rem" }}
+        ></Column>
+        <Column
+          field="linked"
+          header="Availability"
+          sortable
+          body={availabilityTemplate}
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "10rem" }}
         ></Column>
-
         <Column
           body={actionBodyTemplate}
           header="Action"
-          className="border-b dark:bg-navy-800 dark:text-gray-200"
+          className="border-b text-sm dark:bg-navy-800 dark:text-gray-200"
           style={{ minWidth: "9rem" }}
         ></Column>
       </DataTable>

@@ -1,40 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
-import DevicesList from "./components/SimList";
-import DevicesGrid from "./components/SimGrid";
 import { BsGrid, BsListUl } from "react-icons/bs";
 import axios from "axios";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
 import Cookies from "js-cookie";
 import { FiPlus } from "react-icons/fi";
+import PreloaderGrid from "components/skeleton-preloader/PreloaderGrid";
+import PreloaderList from "components/skeleton-preloader/PreloaderList";
+import SimList from "./components/SimList";
+import SimGrid from "./components/SimGrid";
+import { Calendar } from "primereact/calendar";
 
 const SimCards = () => {
   const token = Cookies.get("token");
   const userUUID = Cookies.get("user_uuid");
-  const [devices, setDevices] = useState(true);
+  const [simcards, setSimCards] = useState(true);
   const [data, setData] = useState([]);
   const [isListView, setIsListView] = useState(
     localStorage.getItem("viewPreference") === "grid" ? false : true
   );
+  const [activationDate, setActivationDate] = useState(null);
+  const [validity, setValidity] = useState(null);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
-    device_id: false,
+    sim_number: false,
     device_type: false,
     user_uuid: false,
     status: false,
-    sim_number: false,
   });
-  const requiredFields = ["device_id", "device_type", "user_uuid", "status"];
+  // const requiredFields = ["sim_number", "device_type", "user_uuid", "status"];
   const [addData, setAddData] = useState({
-    device_id: "",
-    device_type: "",
-    user_uuid: "",
-    status: "",
     sim_number: "",
+    sim_data_pack: "",
+    sim_tag: "",
+    sim_owner: "",
   });
-  const [listCustomers, setListCustomers] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const toastRef = useRef(null);
 
   //Fetching all data
@@ -51,12 +53,12 @@ const SimCards = () => {
           key: index + 1,
         }));
         setData(formattedData);
-        console.log(res.data.data);
+        setLoaded(true);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [token, devices]);
+  }, [token, simcards]);
 
   // Edit Devices
   const handleEditDevice = (deviceId, editedDevice) => {
@@ -67,7 +69,7 @@ const SimCards = () => {
         { headers: { authorization: `bearer ${token}` } }
       )
       .then((res) => {
-        setDevices(editedDevice);
+        setSimCards(editedDevice);
         toastRef.current.show({
           severity: "success",
           summary: "Success",
@@ -104,7 +106,7 @@ const SimCards = () => {
         { headers: { authorization: `bearer ${token}` } }
       )
       .then((res) => {
-        setDevices(data);
+        setSimCards(data);
         toastRef.current.show({
           severity: "success",
           summary: "Success",
@@ -125,7 +127,6 @@ const SimCards = () => {
 
   const resetFormData = () => {
     setAddData({
-      device_id: "",
       device_type: "",
       user_uuid: "",
       status: "",
@@ -153,84 +154,56 @@ const SimCards = () => {
     setIsDialogVisible(false);
   };
 
-  //Dropdown options
-  const devicesOptions = [
-    { label: "ECU", value: "ECU" },
-    { label: "IoT", value: "IoT" },
-    { label: "DMS", value: "DMS" },
-  ];
-
-  const stateOptions = [
-    { label: "Active", value: "1" },
-    { label: "Deactive", value: "2" },
-  ];
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/devices/get-customerlist`, {
-        headers: { authorization: `bearer ${token}` },
-      })
-      .then((res) => {
-        setListCustomers(res.data.users);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [token]);
-
-  const Customersoptions = () => {
-    return listCustomers?.map((el) => ({
-      key: el.user_uuid,
-      label: el.first_name + " " + el.last_name,
-      value: el.user_uuid,
-    }));
-  };
-
   // Add customer api call
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      axios
-        .post(
-          `${process.env.REACT_APP_API_URL}/devices/add-device`,
-          { ...addData, userUUID: userUUID },
-          {
-            headers: { authorization: `bearer ${token}` },
-          }
-        )
-        .then((res) => {
-          setDevices(addData);
-          toastRef.current.show({
-            severity: "success",
-            summary: "Success",
-            detail: `Device ${addData.device_id} Added successfully`,
-            life: 3000,
-          });
-          closeDialog();
-        })
-        .catch((err) => {
-          toastRef.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "DeviceId or Sim number Already exists.",
-            life: 3000,
-          });
+
+    axios
+      .post(
+        `${process.env.REACT_APP_AWS_URL}/createSimCards`,
+        {
+          ...addData,
+          sim_activation_date: activationDate,
+          sim_validity: validity,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then((res) => {
+        setSimCards(addData);
+        toastRef.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: `Device ${addData.sim_number} Added successfully`,
+          life: 3000,
         });
-    } else {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Incomplete form",
-        detail: "Please fill in all the required details.",
-        life: 3000,
+        closeDialog();
+      })
+      .catch((err) => {
+        toastRef.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "DeviceId or Sim number Already exists.",
+          life: 3000,
+        });
+        console.log(err);
       });
-      // Set validation errors for the required fields
-      const errors = {};
-      requiredFields.forEach((field) => {
-        errors[field] = !addData[field].trim();
-      });
-      setValidationErrors(errors);
-    }
+
+    // Set validation errors for the required fields
+    // const errors = {};
+    // requiredFields.forEach((field) => {
+    //   errors[field] = !addData[field].trim();
+    // });
+    // setValidationErrors(errors);
   };
+
+  function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based, so add 1 and pad with '0' if needed
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 
   const handleValidation = (name, value) => {
     const errors = { ...validationErrors };
@@ -239,19 +212,19 @@ const SimCards = () => {
   };
 
   // Check if all fields are valid
-  const isFormValid = () => {
-    // Check if all required fields are filled
-    const requiredFieldsFilled = requiredFields.every(
-      (field) => !!addData[field].trim()
-    );
+  // const isFormValid = () => {
+  //   // Check if all required fields are filled
+  //   const requiredFieldsFilled = requiredFields.every(
+  //     (field) => !!addData[field].trim()
+  //   );
 
-    // If device type is "DMS" or "IoT," also check if "sim_number" is filled
-    const isSimNumberRequired =
-      addData.device_type === "DMS" || addData.device_type === "IoT";
-    const simNumberFilled = !isSimNumberRequired || !!addData.sim_number.trim();
+  //   // If device type is "DMS" or "IoT," also check if "sim_number" is filled
+  //   const isSimNumberRequired =
+  //     addData.device_type === "DMS" || addData.device_type === "IoT";
+  //   const simNumberFilled = !isSimNumberRequired || !!addData.sim_number.trim();
 
-    return requiredFieldsFilled && simNumberFilled;
-  };
+  //   return requiredFieldsFilled && simNumberFilled;
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -264,8 +237,8 @@ const SimCards = () => {
     <>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
       <div className="flex justify-between">
-        <h4 className="text-dark pt-3 text-2xl font-bold dark:text-white">
-          Devices
+        <h4 className="text-dark pt-1 text-xl font-semibold dark:text-white">
+          Sim Cards
         </h4>
         <Dialog
           visible={isDialogVisible}
@@ -277,108 +250,7 @@ const SimCards = () => {
           className="p-fluid dark:bg-gray-900"
         >
           <form onSubmit={handleSubmit} className="mx-auto">
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.device_id ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <InputText
-                  id="device_id"
-                  name="device_id"
-                  onChange={handleChange}
-                  className={`border py-2 pl-2 ${
-                    validationErrors.device_id ? "border-red-600" : ""
-                  }`}
-                />
-                <label htmlFor="device_id" className="dark:text-gray-300">
-                  Device ID
-                </label>
-              </span>
-              {validationErrors.device_id && (
-                <small className="text-red-600">Device ID is required</small>
-              )}
-            </div>
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.device_type ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <Dropdown
-                  id="device_type"
-                  name="device_type"
-                  options={devicesOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  className={`p-dropdown border ${
-                    validationErrors.device_type ? "border-red-600" : ""
-                  }`}
-                  onChange={handleChange}
-                  value={addData.device_type}
-                />
-                <label htmlFor="device_type" className="dark:text-gray-300">
-                  Device Type
-                </label>
-              </span>
-              {validationErrors.device_type && (
-                <small className="text-red-600">Device Type is required</small>
-              )}
-            </div>
-
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.user_uuid ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <Dropdown
-                  id="user_uuid"
-                  name="user_uuid"
-                  options={Customersoptions()}
-                  optionLabel="label"
-                  optionValue="value"
-                  className={`p-dropdown border ${
-                    validationErrors.user_uuid ? "border-red-600" : ""
-                  }`}
-                  onChange={handleChange}
-                  value={addData.user_uuid}
-                />
-                <label htmlFor="user_uuid" className="dark:text-gray-300">
-                  Select Customer
-                </label>
-              </span>
-              {validationErrors.user_uuid && (
-                <small className="text-red-600">Customer is required</small>
-              )}
-            </div>
-            <div
-              className={`mx-auto mt-8 w-full ${
-                validationErrors.status ? "p-error" : ""
-              }`}
-            >
-              <span className="p-float-label">
-                <Dropdown
-                  id="status"
-                  name="status"
-                  options={stateOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  className={`p-dropdown border ${
-                    validationErrors.status ? "border-red-600" : ""
-                  }`}
-                  onChange={handleChange}
-                  value={addData.status}
-                />
-                <label htmlFor="status" className="dark:text-gray-300">
-                  Status
-                </label>
-              </span>
-              {validationErrors.status && (
-                <small className="text-red-600">Status is required</small>
-              )}
-            </div>
-            {addData.device_type !== "ECU" && (
+            <div className="flex justify-between gap-4">
               <div
                 className={`mx-auto mt-8 w-full ${
                   validationErrors.sim_number ? "p-error" : ""
@@ -388,21 +260,136 @@ const SimCards = () => {
                   <InputText
                     id="sim_number"
                     name="sim_number"
-                    keyfilter="pint"
                     onChange={handleChange}
                     className={`border py-2 pl-2 ${
                       validationErrors.sim_number ? "border-red-600" : ""
                     }`}
                   />
-                  <label htmlFor="device_id" className="dark:text-gray-300">
+                  <label htmlFor="sim_number" className="dark:text-gray-300">
                     Sim Number
                   </label>
                 </span>
                 {validationErrors.sim_number && (
-                  <small className="text-red-600">Sim number is required</small>
+                  <small className="text-red-600">Device ID is required</small>
                 )}
               </div>
-            )}
+              <div
+                className={`mx-auto mt-8 w-full ${
+                  validationErrors.sim_data_pack ? "p-error" : ""
+                }`}
+              >
+                <span className="p-float-label">
+                  <InputText
+                    id="sim_data_pack"
+                    name="sim_data_pack"
+                    onChange={handleChange}
+                    className={`border py-2 pl-2 ${
+                      validationErrors.sim_data_pack ? "border-red-600" : ""
+                    }`}
+                  />
+                  <label htmlFor="sim_data_pack" className="dark:text-gray-300">
+                    Data Pack
+                  </label>
+                </span>
+                {validationErrors.sim_data_pack && (
+                  <small className="text-red-600">Device ID is required</small>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between gap-4">
+              <div
+                className={`mx-auto mt-8 w-full ${
+                  validationErrors.sim_tag ? "p-error" : ""
+                }`}
+              >
+                <span className="p-float-label">
+                  <InputText
+                    id="sim_tag"
+                    name="sim_tag"
+                    onChange={handleChange}
+                    className={`border py-2 pl-2 ${
+                      validationErrors.sim_tag ? "border-red-600" : ""
+                    }`}
+                  />
+                  <label htmlFor="sim_tag" className="dark:text-gray-300">
+                    Sim Tag
+                  </label>
+                </span>
+                {validationErrors.sim_tag && (
+                  <small className="text-red-600">Device ID is required</small>
+                )}
+              </div>
+              <div
+                className={`mx-auto mt-8 w-full ${
+                  validationErrors.sim_owner ? "p-error" : ""
+                }`}
+              >
+                <span className="p-float-label">
+                  <InputText
+                    id="sim_owner"
+                    name="sim_owner"
+                    onChange={handleChange}
+                    className={`border py-2 pl-2 ${
+                      validationErrors.sim_owner ? "border-red-600" : ""
+                    }`}
+                  />
+                  <label htmlFor="sim_owner" className="dark:text-gray-300">
+                    Sim Owner
+                  </label>
+                </span>
+                {validationErrors.sim_owner && (
+                  <small className="text-red-600">Device ID is required</small>
+                )}
+              </div>
+            </div>
+            <div className="card p-fluid mt-6 flex flex-wrap gap-3">
+              <div className="flex-auto">
+                <span className="p-float-label">
+                  <Calendar
+                    inputId="start_date"
+                    value={activationDate ? new Date(activationDate) : null}
+                    onChange={(e) => {
+                      const formattedDate = formatDateToYYYYMMDD(e.value);
+                      setActivationDate(formattedDate);
+                    }}
+                    className={`rounded-lg border border-gray-300 `}
+                  />
+                  <label
+                    htmlFor="start_date"
+                    className="text-gray-600 dark:text-gray-150"
+                  >
+                    From
+                  </label>
+                </span>
+              </div>
+              <div className="flex-auto">
+                <span className="p-float-label">
+                  <Calendar
+                    inputId="end_date"
+                    value={validity ? new Date(validity) : null}
+                    onChange={(e) => {
+                      const formattedDate = formatDateToYYYYMMDD(e.value);
+                      setValidity(formattedDate);
+                    }}
+                    className={`rounded-lg border border-gray-300 `}
+                  />
+                  <label
+                    htmlFor="start_date"
+                    className="text-gray-600  dark:text-gray-150"
+                  >
+                    To
+                  </label>
+                </span>
+
+                {/* {!endDateValid ? (
+                  <small className="text-red-500">To date is required.</small>
+                ) : (
+                  <small className="text-gray-400 dark:text-gray-150">
+                    Click to Select
+                  </small>
+                )} */}
+              </div>
+            </div>
             <div className="mt-6 flex justify-center">
               <button
                 type="submit"
@@ -413,12 +400,12 @@ const SimCards = () => {
             </div>
           </form>
         </Dialog>
-        <div className="pt-3">
+        <div className="pt-2">
           <button
             className={`${
               isListView === true
-                ? "list-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "list-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "list-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "list-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -427,8 +414,8 @@ const SimCards = () => {
           <button
             className={`${
               isListView === false
-                ? "grid-btn bg-gray-150 px-3 py-2  dark:bg-gray-700  "
-                : "grid-btn bg-white px-3 py-2  dark:bg-gray-150 "
+                ? "grid-btn bg-gray-150 px-2 py-1  dark:bg-gray-700  "
+                : "grid-btn bg-white px-2 py-1  dark:bg-gray-150 "
             }`}
             onClick={handleToggleView}
           >
@@ -437,26 +424,42 @@ const SimCards = () => {
         </div>
       </div>
       <button
-        className="mt-2 flex h-10 items-center rounded-lg bg-blue-500 px-3 py-2 text-left font-semibold text-white hover:bg-blue-600"
+        className="flex items-center rounded-lg bg-blue-500 px-2 py-1 text-left text-sm font-normal text-white hover:bg-blue-600"
         onClick={openDialog}
       >
-        <FiPlus className="mr-2" />
-        New Device
+        <FiPlus />
+        &nbsp;New Sim Card
       </button>
       {!isListView && (
-        <DevicesGrid
-          data={data}
-          onEditDevice={handleEditDevice}
-          onDeleteDevice={handleDeleteDevice}
-        />
+        <div className="opacity-100 transition-opacity duration-500">
+          {loaded ? (
+            <SimGrid
+              data={data}
+              // deviceType={devicesOptions()}
+              onEditDevice={handleEditDevice}
+              onDeleteDevice={handleDeleteDevice}
+            />
+          ) : (
+            <div className="mt-6">
+              <PreloaderGrid />
+            </div>
+          )}
+        </div>
       )}
       {isListView && (
         <div className="opacity-100 transition-opacity duration-500">
-          <DevicesList
-            data={data}
-            onEditDevice={handleEditDevice}
-            onDeleteDevice={handleDeleteDevice}
-          />
+          {loaded ? (
+            <SimList
+              data={data}
+              // deviceType={devicesOptions()}
+              onEditDevice={handleEditDevice}
+              onDeleteDevice={handleDeleteDevice}
+            />
+          ) : (
+            <div className="mt-6">
+              <PreloaderList />
+            </div>
+          )}
         </div>
       )}
     </>

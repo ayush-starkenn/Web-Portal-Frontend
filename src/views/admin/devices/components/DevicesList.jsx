@@ -346,7 +346,6 @@ export default function DevicesList({
             );
           }}
         ></Column>
-
         <Column
           field="device_status"
           header="Status"

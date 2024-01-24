@@ -6,10 +6,13 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { MdOnDeviceTraining } from "react-icons/md";
+import { LiaSimCardSolid } from "react-icons/lia";
 import { Toast } from "primereact/toast";
 import Cookies from "js-cookie";
 import { Tag } from "primereact/tag";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { TiInputChecked } from "react-icons/ti";
 
 const applyFilters = (filters, allData) => {
   let filteredData = allData;
@@ -32,7 +35,7 @@ const applyFilters = (filters, allData) => {
   return filteredData;
 };
 
-export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
+export default function SimGrid({ data, onDeleteDevice, onEditDevice }) {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -45,7 +48,6 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [listCustomers, setListCustomers] = useState([]);
-  const totalItems = filteredData.length;
   const toastRef = useRef(null);
   const token = Cookies.get("token");
   //dropdown options
@@ -150,72 +152,70 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
 
   //card
   const itemTemplate = (item) => {
-    const tagSeverity = item?.device_status === 1 ? "success" : "danger";
+    const tagSeverity = item?.sim_is_active === 1 ? "success" : "danger";
+    const formattedValidity =
+      item.sim_validity &&
+      new Date(item.sim_validity).toLocaleDateString("en-GB");
     return (
-      <div className="p-col-12 mb-6 rounded-lg bg-gray-50 transition duration-300 ease-in-out hover:shadow-lg dark:bg-gray-900 dark:text-gray-150">
+      <div className="mb-4 w-[28.8vw] rounded-lg bg-gray-50 transition duration-300 ease-in-out hover:shadow-lg dark:bg-gray-900 dark:text-gray-150 dark:hover:bg-navy-700 md-max:w-[88vw]">
         <div className="card">
-          <div className="card-header flex justify-between">
-            <div className="p-text-bold">{item.device_id}</div>
-            <div className="p-text-bold">
+          <div className="card-header flex justify-between rounded-t-lg bg-[#ddd] dark:border-none dark:bg-navy-800">
+            <div className="text-sm font-semibold">{item.sim_number}</div>
+            <div className="text-sm font-semibold">
               <Tag
-                value={item.device_status === 1 ? "Active" : "Deactive"}
-                severity={tagSeverity}
+                className="mr-2 bg-gray-200 text-gray-800"
+                icon="pi pi-tag"
+                style={{
+                  width: "fit-content",
+                  height: "25px",
+                }}
+                value={item.sim_tag}
               />
             </div>
           </div>
-          <div className="card-body py-3">
+          <div className="card-body">
             <div className="flex items-center justify-between">
-              <div style={{ width: "-webkit-fill-available" }}>
-                <div className="flex justify-between pb-1 font-semibold ">
-                  <div className="whitespace-nowrap">
-                    <span>Device Type</span>
-                  </div>
-                  <div>
-                    <span>{item.device_type}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between py-1 font-semibold ">
-                  <div className="mr-6 whitespace-nowrap">
-                    <span>Customer</span>
-                  </div>
-                  <div>
-                    <span>{item.full_name}</span>
-                  </div>
-                </div>
-                <div className="text-bold flex justify-between py-1 font-semibold ">
-                  <div className=" whitespace-nowrap">
-                    <span>Sim Number</span>
-                  </div>
-                  <div>
-                    <span>{item.sim_number}</span>
-                  </div>
-                </div>
+              <div className="flex flex-col">
+                <span className="mb-1 ml-1 text-sm">
+                  Valid till - {formattedValidity}
+                </span>
+                <span className="mb-1 ml-1 text-sm">
+                  Data Pack - {item.sim_data_pack}
+                </span>
+                <span className="flex text-sm">
+                  <TiInputChecked
+                    className={`h-6 w-6 ${
+                      item.linked === null ? "text-green-600" : "text-red-500"
+                    }`}
+                  />
+                  {item.linked === null ? "Available" : "Not Available"}
+                </span>
               </div>
+
               <div className="pl-3">
-                <MdOnDeviceTraining className="text-6xl text-gray-500" />
+                <LiaSimCardSolid className="text-5xl text-gray-500" />
               </div>
             </div>
-            <div className="mt-4 flex justify-center rounded">
-              <div>
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  tooltip="Edit"
-                  tooltipOptions={{ position: "mouse" }}
-                  className="mr-3 border border-gray-700 text-gray-700"
-                  style={{ width: "2rem", height: "2rem" }}
-                  onClick={() => handleEdit(item)}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  tooltip="Delete"
-                  tooltipOptions={{ position: "mouse" }}
-                  style={{ width: "2rem", height: "2rem" }}
-                  className="border border-red-600 text-red-600"
-                  onClick={() => handleDelete(item)}
-                />
-              </div>
+          </div>
+          <div className="flex justify-between rounded-b-lg border-t-2 py-2 dark:border-gray-700">
+            <div className="ml-4">
+              <Tag
+                value={item.sim_is_active === 1 ? "Active" : "Deactive"}
+                severity={tagSeverity}
+                className="h-5 rounded-sm text-xs font-normal"
+              />
+            </div>
+            <div className="flex">
+              <FaRegEdit
+                title="Edit"
+                onClick={() => handleEdit(item)}
+                className="cursor-pointer text-gray-700"
+              />
+              <RiDeleteBin6Line
+                title="Delete"
+                onClick={() => handleDelete(item)}
+                className="ml-2 mr-4 cursor-pointer text-red-600"
+              />
             </div>
           </div>
         </div>
@@ -408,24 +408,26 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
   //Searchbox
   return (
     <div>
-      <div className="my-4 mr-7  flex justify-end">
-        <div className="justify-content-between align-items-center flex flex-wrap gap-2">
+      <div className="mb-4 mt-2 flex justify-end align-middle">
+        <div className="flex items-center">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-              placeholder="Keyword Search"
-              className="searchbox w-[25vw] cursor-pointer rounded-full border py-3 pl-8 dark:bg-gray-950 dark:text-gray-50"
-            />
-            {globalFilterValue && (
+          </span>
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Keyword Search"
+            className="searchbox w-[25vw] cursor-pointer rounded-full border py-2 pl-8 text-sm font-normal dark:bg-gray-950 dark:text-gray-50"
+          />
+          {globalFilterValue && (
+            <div>
               <Button
                 icon="pi pi-times"
-                className="p-button-rounded p-button-text dark:text-gray-50 dark:hover:text-gray-50"
+                className="p-button-rounded p-button-text py-auto dark:text-gray-50 dark:hover:text-gray-50"
                 onClick={clearSearch}
               />
-            )}
-          </span>
+            </div>
+          )}
         </div>
       </div>
       <Toast ref={toastRef} className="toast-custom" position="top-right" />
@@ -435,10 +437,12 @@ export default function DevicesGrid({ data, onDeleteDevice, onEditDevice }) {
         layout="grid"
         itemTemplate={itemTemplate}
         paginator
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         rows={6}
-        emptyMessage="No devices found."
+        rowsPerPageOptions={[6, 12, 18]}
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        emptyMessage="No sim cards found."
       />
-      <p className="text-center text-gray-700">Total Items : {totalItems}</p>
       {/* Delete dialog */}
       <Dialog
         visible={isDeleteDialogVisible}
