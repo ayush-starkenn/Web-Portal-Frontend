@@ -11,6 +11,7 @@ import { RadioButton } from 'primereact/radiobutton';
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
+import PreloaderList from "components/skeleton-preloader/PreloaderList";
         
 
 const Contacts = () => {
@@ -23,6 +24,7 @@ const Contacts = () => {
   const [formErrors, setFormErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
   const toastRef = useRef(null);
+  const [loaded, setLoaded] = useState(false);
   const [contactType , setContactType] = useState("phone");
   const [primaryType, setPrimaryType] = useState("yes");
   const isValidPhoneNumber = (phoneNumber) => {
@@ -57,6 +59,7 @@ const Contacts = () => {
       )
       .then((res) => {
         console.log(res.data.data);
+        setLoaded(true);
         const formatedData = res.data.data.map((item, ind) => ({
           ...item,
           serialNo: ind + 1,
@@ -374,13 +377,17 @@ const Contacts = () => {
             </div>
           </form>
         </Dialog>
-        <div className="mt-[-4px]">
+        {loaded ? (<div className="mt-[-4px]">
           <ContactsList
             contactsData={contactsData}
             editContacts={editContacts}
             deleteContact={deleteContact}
           />
-        </div>
+        </div>) : ( <div className="mt-6">
+              <PreloaderList />
+            </div>)}
+        
+       
       </div>
     </>
   );
